@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Karyawan;
 use App\Models\Kehadiran;
 use App\Models\Penggajian;
-use App\Models\Kasbon;
 use Carbon\Carbon;
 
 class PenggajianService
@@ -13,80 +12,90 @@ class PenggajianService
     public function hitungGaji($karyawanId, $periodeMulai, $periodeSelesai)
     {
         $karyawan = Karyawan::findOrFail($karyawanId);
-        $periodeMulai = Carbon::parse($periodeMulai);
-        $periodeSelesai = Carbon::parse($periodeSelesai);
 
-        // Ambil kehadiran dalam periode
+        $periodeMulai = Carbon::parse($periodeMulai)->startOfDay();
+        $periodeSelesai = Carbon::parse($periodeSelesai)->endOfDay();
+
         $kehadiran = Kehadiran::where('karyawan_id', $karyawanId)
             ->whereBetween('tanggal', [$periodeMulai, $periodeSelesai])
             ->get();
 
-        // ===== HARI KERJA (minimal ada scan masuk)
-        $hariKerja = $kehadiran->filter(fn($k) => $k->scan_1)->count();
+        /* ================= HARI KERJA ================= */
+        $hariKerja = $kehadiran->filter(fn ($k) =>
+            $k->scan_1 && !$k->is_tanggal_merah
+        )->count();
 
-        // ===== BAGI PERIODE PER MINGGU
+        /* ================= MINGGU ================= */
         $minggu1Akhir = $periodeMulai->copy()->addDays(6);
 
-        $minggu1 = $kehadiran->filter(fn($k) =>
+        $minggu1 = $kehadiran->filter(fn ($k) =>
             $k->tanggal->between($periodeMulai, $minggu1Akhir)
         );
 
-        $minggu2 = $kehadiran->filter(fn($k) =>
+        $minggu2 = $kehadiran->filter(fn ($k) =>
             $k->tanggal->gt($minggu1Akhir)
         );
 
-        // ===== ALFA (tidak masuk)
         $alfaM1 = $this->hitungAlfa($minggu1);
         $alfaM2 = $this->hitungAlfa($minggu2);
 
-        // ===== GAJI POKOK
+        /* ================= GAJI ================= */
         $gajiPokok = $hariKerja * $karyawan->gaji_per_hari;
 
-        // ===== PREMI (HILANG JIKA ALFA >=1 DI MINGGU 1)
-        $premiFull = $alfaM1 >= 1 ? 0 : $karyawan->bonus_hadir_per_minggu;
+        $bonusMinggu1 = $alfaM1 >= 1 ? 0 : $karyawan->bonus_hadir_per_minggu;
+        $bonusMinggu2 = $alfaM2 >= 1 ? 0 : $karyawan->bonus_hadir_per_minggu;
 
-        // ===== UANG MAKAN (HANYA HARI MASUK)
-        $uangMakan = $kehadiran->filter(fn($k) => $k->scan_1)->count()
-            * $karyawan->uang_makan;
+        $uangMakan = $kehadiran->filter(fn ($k) =>
+            $k->scan_1 && !$k->is_tanggal_merah
+        )->count() * $karyawan->uang_makan;
 
-        // ===== LEMBUR
+        /* ================= LEMBUR ================= */
         $jamLemburBiasa = 0;
         $lemburBiasa = 0;
         $jamLemburTglMerah = 0;
         $lemburTglMerah = 0;
 
         foreach ($kehadiran as $k) {
-            if ($k->is_tanggal_merah && $k->scan_1 && $k->scan_pulang) {
-                $jamKerja = Carbon::parse($k->tanggal.' '.$k->scan_1)
-                    ->diffInHours(Carbon::parse($k->tanggal.' '.$k->scan_pulang));
+            if (!$k->scan_1 || !$k->scan_pulang) continue;
 
-                $jamLemburTglMerah += $jamKerja;
-                $lemburTglMerah += $jamKerja * $karyawan->lembur_tanggal_merah_per_jam;
-            } elseif (!$k->is_tanggal_merah) {
+            $masuk = $k->tanggal->copy()->setTimeFromTimeString($k->scan_1);
+            $pulang = $k->tanggal->copy()->setTimeFromTimeString($k->scan_pulang);
+
+            if ($k->is_tanggal_merah) {
+                $menit = $masuk->diffInMinutes($pulang);
+
+                if ($masuk < $k->tanggal->copy()->setTime(13, 0) &&
+                    $pulang > $k->tanggal->copy()->setTime(12, 0)) {
+                    $menit -= 60;
+                }
+
+                $jam = max(0, floor($menit / 60));
+                $jamLemburTglMerah += $jam;
+                $lemburTglMerah += $jam * $karyawan->lembur_tanggal_merah_per_jam;
+            } else {
                 $jamLemburBiasa += $k->jam_lembur;
                 $lemburBiasa += $k->jam_lembur * $karyawan->lembur_biasa_per_jam;
             }
         }
 
-        // ===== POTONGAN TERLAMBAT
+        /* ================= POTONGAN ================= */
         $potonganMasukSiang = $kehadiran->sum('potongan_terlambat');
 
-        // ===== KASBON
-        $sisaKasbon = method_exists($karyawan, 'getTotalSisaKasbonAttribute')
-            ? $karyawan->total_sisa_kasbon
-            : 0;
-        $kasbonBaru = 0;
+        $sisaKasbon = $karyawan->total_sisa_kasbon ?? 0;
+        $potonganKasbon = min($sisaKasbon,
+            $gajiPokok + $bonusMinggu1 + $bonusMinggu2 +
+            $uangMakan + $lemburBiasa + $lemburTglMerah - $potonganMasukSiang
+        );
 
-        $totalSebelumKasbon =
+        $totalGaji =
             $gajiPokok +
-            $premiFull +
+            $bonusMinggu1 +
+            $bonusMinggu2 +
             $uangMakan +
             $lemburBiasa +
             $lemburTglMerah -
-            $potonganMasukSiang;
-
-        $potonganKasbon = min($sisaKasbon, $totalSebelumKasbon);
-        $totalGaji = $totalSebelumKasbon - $potonganKasbon;
+            $potonganMasukSiang -
+            $potonganKasbon;
 
         return [
             'karyawan_id' => $karyawan->id,
@@ -94,11 +103,11 @@ class PenggajianService
             'periode_selesai' => $periodeSelesai->format('Y-m-d'),
             'hari_kerja' => $hariKerja,
             'gaji_per_hari' => $karyawan->gaji_per_hari,
-            'premi_full' => $premiFull,
+            'premi_full' => $gajiPokok,
             'alfa_m1' => $alfaM1,
             'alfa_m2' => $alfaM2,
-            'bonus_minggu_1' => $premiFull,
-            'bonus_minggu_2' => 0,
+            'bonus_minggu_1' => $bonusMinggu1,
+            'bonus_minggu_2' => $bonusMinggu2,
             'uang_makan' => $uangMakan,
             'jam_lembur_biasa' => $jamLemburBiasa,
             'lembur_biasa' => $lemburBiasa,
@@ -106,16 +115,15 @@ class PenggajianService
             'lembur_tgl_merah' => $lemburTglMerah,
             'potongan_masuk_siang' => $potonganMasukSiang,
             'sisa_kasbon' => $sisaKasbon,
-            'kasbon_baru' => $kasbonBaru,
+            'kasbon_baru' => 0,
             'potongan_kasbon' => $potonganKasbon,
             'total_gaji' => $totalGaji,
         ];
-
     }
 
     private function hitungAlfa($kehadiran)
     {
-        return $kehadiran->filter(fn($k) => !$k->scan_1)->count();
+        return $kehadiran->filter(fn ($k) => !$k->scan_1)->count();
     }
 
     public function simpanGaji(array $data)
@@ -130,22 +138,26 @@ class PenggajianService
         );
     }
 
-    public function generatePenggajianMassal($karyawanIds, $periodeMulai, $periodeSelesai)
+    public function generatePenggajianMassal(array $karyawanIds, $periodeMulai, $periodeSelesai)
     {
         $hasil = [];
 
         foreach ($karyawanIds as $karyawanId) {
             try {
-                $data = $this->hitungGaji($karyawanId, $periodeMulai, $periodeSelesai);
+                $dataGaji = $this->hitungGaji(
+                    $karyawanId,
+                    $periodeMulai,
+                    $periodeSelesai
+                );
+
+                $penggajian = $this->simpanGaji($dataGaji);
 
                 $hasil[] = [
                     'status' => 'success',
                     'karyawan_id' => $karyawanId,
-                    'penggajian' => $this->simpanGaji($data)
+                    'penggajian' => $penggajian,
                 ];
-
             } catch (\Throwable $e) {
-
                 \Log::error('Gagal generate gaji', [
                     'karyawan_id' => $karyawanId,
                     'error' => $e->getMessage(),

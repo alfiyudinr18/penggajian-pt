@@ -55,7 +55,7 @@
                     <th class="px-2 py-2 text-left">Nama</th>
                     <th class="px-2 py-2 text-center">Hari Kerja</th>
                     <th class="px-2 py-2 text-right">Gaji/Hari</th>
-                    <th class="px-2 py-2 text-right">Premi Full</th>
+                    <th class="px-2 py-2 text-right">Full</th>
                     <th class="px-2 py-2 text-center">Alfa M1</th>
                     <th class="px-2 py-2 text-center">Alfa M2</th>
                     <th class="px-2 py-2 text-right">Bonus M1</th>
