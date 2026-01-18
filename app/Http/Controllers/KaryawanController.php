@@ -22,7 +22,7 @@ class KaryawanController extends Controller
     {
         $validated = $request->validate([
             'pin' => 'required|unique:karyawan,pin',
-            'nip' => 'required|unique:karyawan,nip',
+            'nip' => 'nullable|string|unique:karyawan,nip,',
             'nama' => 'required|string|max:255',
             'jabatan' => 'nullable|string|max:255',
             'departemen' => 'nullable|string|max:255',
@@ -60,7 +60,7 @@ class KaryawanController extends Controller
     {
         $validated = $request->validate([
             'pin' => 'required|unique:karyawan,pin,' . $karyawan->id,
-            'nip' => 'required|unique:karyawan,nip,' . $karyawan->id,
+            'nip' => 'nullable|string|unique:karyawan,nip,' . $karyawan->id,
             'nama' => 'required|string|max:255',
             'jabatan' => 'nullable|string|max:255',
             'departemen' => 'nullable|string|max:255',

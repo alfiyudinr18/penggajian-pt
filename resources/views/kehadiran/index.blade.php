@@ -6,10 +6,20 @@
 <div class="bg-white rounded-lg shadow-md p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Daftar Kehadiran</h1>
-        <a href="{{ route('kehadiran.create') }}"
-           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            <i class="fas fa-plus"></i> Tambah Kehadiran
-        </a>
+
+        <div class="flex gap-2">
+            {{-- IMPORT EXCEL --}}
+            <button onclick="openImportModal()"
+                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                <i class="fas fa-file-excel"></i> Import Excel
+            </button>
+
+            {{-- TAMBAH MANUAL --}}
+            <a href="{{ route('kehadiran.create') }}"
+               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <i class="fas fa-plus"></i> Tambah Kehadiran
+            </a>
+        </div>
     </div>
 
     {{-- FILTER --}}
@@ -72,35 +82,17 @@
             <tbody>
             @forelse($kehadiran as $k)
                 <tr class="border-b hover:bg-gray-50">
-                    {{-- TANGGAL --}}
                     <td class="px-4 py-2">
                         {{ $k->tanggal->format('d/m/Y') }}
                         <span class="text-xs text-gray-500">
                             ({{ $k->tanggal->locale('id')->dayName }})
                         </span>
                     </td>
+                    <td class="px-4 py-2 font-semibold">{{ $k->karyawan->nama }}</td>
+                    <td class="px-4 py-2 text-center">{{ $k->scan_1 ?? '-' }}</td>
+                    <td class="px-4 py-2 text-center">{{ $k->scan_pulang ?? '-' }}</td>
+                    <td class="px-4 py-2 text-center">{{ $k->scan_3 ?? '-' }}</td>
 
-                    {{-- NAMA --}}
-                    <td class="px-4 py-2 font-semibold">
-                        {{ $k->karyawan->nama }}
-                    </td>
-
-                    {{-- SCAN MASUK --}}
-                    <td class="px-4 py-2 text-center">
-                        {{ $k->scan_1 ?? '-' }}
-                    </td>
-
-                    {{-- SCAN PULANG --}}
-                    <td class="px-4 py-2 text-center">
-                        {{ $k->scan_pulang ?? '-' }}
-                    </td>
-
-                    {{-- SCAN 3 --}}
-                    <td class="px-4 py-2 text-center">
-                        {{ $k->scan_3 ?? '-' }}
-                    </td>
-
-                    {{-- JAM LEMBUR BIASA --}}
                     <td class="px-4 py-2 text-center">
                         @if(!$k->is_tanggal_merah && $k->jam_lembur > 0)
                             <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-bold">
@@ -111,23 +103,16 @@
                         @endif
                     </td>
 
-                    {{-- LEMBUR TANGGAL MERAH --}}
                     <td class="px-4 py-2 text-center">
                         @if($k->is_tanggal_merah && $k->jam_kerja_tanggal_merah > 0)
-                            <div>
-                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold">
-                                    {{ $k->jam_kerja_tanggal_merah }} jam
-                                </span>
-                                <div class="text-xs text-gray-600 mt-1">
-                                    Rp {{ number_format($k->upah_tanggal_merah, 0, ',', '.') }}
-                                </div>
-                            </div>
+                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold">
+                                {{ $k->jam_kerja_tanggal_merah }} jam
+                            </span>
                         @else
                             <span class="text-gray-400 text-sm">-</span>
                         @endif
                     </td>
 
-                    {{-- TERLAMBAT --}}
                     <td class="px-4 py-2 text-center">
                         @if($k->terlambat >= 5)
                             <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
@@ -143,7 +128,6 @@
                         @endif
                     </td>
 
-                    {{-- STATUS --}}
                     <td class="px-4 py-2 text-center">
                         @if($k->is_tanggal_merah)
                             <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Tanggal Merah</span>
@@ -154,19 +138,13 @@
                         @endif
                     </td>
 
-                    {{-- AKSI --}}
                     <td class="px-4 py-2 text-center">
-                        <a href="{{ route('kehadiran.edit', $k) }}"
-                           class="text-yellow-600 hover:text-yellow-800 mx-1">
+                        <a href="{{ route('kehadiran.edit', $k) }}" class="text-yellow-600 mx-1">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <form action="{{ route('kehadiran.destroy', $k) }}"
-                              method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="text-red-600 hover:text-red-800 mx-1"
-                                    onclick="return confirm('Yakin ingin menghapus?')">
+                        <form action="{{ route('kehadiran.destroy', $k) }}" method="POST" class="inline">
+                            @csrf @method('DELETE')
+                            <button onclick="return confirm('Yakin?')" class="text-red-600 mx-1">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
@@ -183,8 +161,44 @@
         </table>
     </div>
 
-    <div class="mt-4">
-        {{ $kehadiran->links() }}
+    <div class="mt-4">{{ $kehadiran->links() }}</div>
+</div>
+
+{{-- ================= MODAL IMPORT ================= --}}
+<div id="importModal"
+     class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+        <h2 class="text-lg font-bold mb-4">Import Kehadiran (Excel)</h2>
+
+        <form action="{{ route('kehadiran.import') }}"
+              method="POST" enctype="multipart/form-data">
+            @csrf
+
+            <input type="file" name="file"
+                   accept=".xls,.xlsx"
+                   class="w-full border rounded px-3 py-2 mb-4" required>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeImportModal()"
+                        class="bg-gray-500 text-white px-4 py-2 rounded">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="bg-green-600 text-white px-4 py-2 rounded">
+                    Import
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
+{{-- ================= SCRIPT ================= --}}
+<script>
+function openImportModal() {
+    document.getElementById('importModal').classList.remove('hidden');
+}
+function closeImportModal() {
+    document.getElementById('importModal').classList.add('hidden');
+}
+</script>
 @endsection

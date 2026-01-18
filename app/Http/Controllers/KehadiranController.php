@@ -107,11 +107,30 @@ class KehadiranController extends Controller
             ->with('success', 'Data kehadiran berhasil diperbarui.');
     }
 
+    public function show(Kehadiran $kehadiran)
+    {
+        // kalau memang tidak dipakai, redirect saja
+        return redirect()->route('kehadiran.index');
+    }
+
+
     public function destroy(Kehadiran $kehadiran)
     {
         $kehadiran->delete();
 
         return redirect()->route('kehadiran.index')
             ->with('success', 'Data kehadiran berhasil dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xls,xlsx|max:2048'
+        ]);
+
+        // nanti di sini panggil Excel::import(...)
+        // sementara test dulu
+        return redirect()->route('kehadiran.index')
+            ->with('success', 'File berhasil dikirim (import logic menyusul)');
     }
 }

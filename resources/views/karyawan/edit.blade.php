@@ -23,9 +23,9 @@
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">NIP *</label>
+                <label class="block text-gray-700 font-semibold mb-2">NIP</label>
                 <input type="text" name="nip" value="{{ old('nip', $karyawan->nip ?? '') }}"
-                    class="w-full border rounded px-3 py-2 @error('nip') border-red-500 @enderror" required>
+                    class="w-full border rounded px-3 py-2 @error('nip') border-red-500 @enderror">
                 @error('nip')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror

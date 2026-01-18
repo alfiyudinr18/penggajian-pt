@@ -3,6 +3,7 @@
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\KehadiranController;
 use App\Http\Controllers\KasbonController;
+use App\Http\Controllers\KehadiranImportController;
 use App\Http\Controllers\PenggajianController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,7 +15,12 @@ Route::get('/', function () {
 Route::resource('karyawan', KaryawanController::class);
 
 // Kehadiran Routes
-Route::resource('kehadiran', KehadiranController::class);
+Route::resource('kehadiran', KehadiranController::class)
+    ->except(['show']);
+
+Route::post('/kehadiran/import', [KehadiranImportController::class, 'import'])
+    ->name('kehadiran.import');
+
 
 // Kasbon Routes
 Route::resource('kasbon', KasbonController::class);
