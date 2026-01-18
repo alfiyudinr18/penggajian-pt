@@ -36,6 +36,14 @@ class Kehadiran extends Model
         return $this->belongsTo(Karyawan::class);
     }
 
+    private function jamSelesaiKerja()
+    {
+        $tanggal = $this->tanggal->format('Y-m-d');
+        return $this->is_sabtu
+            ? Carbon::parse($tanggal.' 16:00')
+            : Carbon::parse($tanggal.' 17:00');
+    }
+
     public function getScanMasukAttribute()
     {
         return $this->scan_1;
@@ -55,72 +63,126 @@ class Kehadiran extends Model
 
     public function getJamLemburAttribute()
     {
-        // Pastikan ada scan masuk dan pulang
-        if (!$this->scan_masuk || !$this->scan_pulang) {
+        // tanggal merah tidak pakai lembur biasa
+        if ($this->is_tanggal_merah || !$this->scan_pulang) {
             return 0;
         }
 
         $tanggal = $this->tanggal->format('Y-m-d');
+        $pulang = Carbon::parse($tanggal . ' ' . $this->scan_pulang);
 
-        // Parse waktu dengan tanggal lengkap
-        $jamPulang = Carbon::parse($tanggal . ' ' . $this->scan_pulang);
-
-        // Tentukan jam mulai lembur berdasarkan jenis hari
-        if ($this->is_tanggal_merah) {
-            // Tanggal merah: lembur mulai jam 16:00
-            $jamMulaiLembur = Carbon::parse($tanggal . ' 16:00');
-        } elseif ($this->is_sabtu) {
-            // Sabtu: lembur mulai jam 17:00 (1 jam setelah pulang jam 16:00)
-            $jamMulaiLembur = Carbon::parse($tanggal . ' 17:00');
+        // setting hari
+        if ($this->is_sabtu) {
+            $jamSelesai = Carbon::parse($tanggal . ' 16:00');
+            $jamLemburMulai = Carbon::parse($tanggal . ' 17:00');
         } else {
-            // Hari biasa: lembur mulai jam 18:00 (1 jam setelah pulang jam 17:00)
-            $jamMulaiLembur = Carbon::parse($tanggal . ' 18:00');
+            $jamSelesai = Carbon::parse($tanggal . ' 17:00');
+            $jamLemburMulai = Carbon::parse($tanggal . ' 18:00');
         }
 
-        // Cek apakah sudah melewati jam mulai lembur
-        if ($jamPulang->lessThanOrEqualTo($jamMulaiLembur)) {
+        // toleransi lembur (5 menit per jam)
+        $toleransiMenit = 5;
+
+        // belum masuk lembur (termasuk toleransi awal)
+        if ($pulang->lt($jamLemburMulai->copy()->subMinutes($toleransiMenit))) {
             return 0;
         }
 
-        // Hitung selisih dalam jam (pembulatan ke bawah per jam)
-        $selisihMenit = $jamPulang->diffInMinutes($jamMulaiLembur);
-        $jamLembur = floor($selisihMenit / 60);
+        // selisih menit dari jam lembur mulai
+        $menit = $jamLemburMulai->diffInMinutes($pulang);
 
-        // Untuk tanggal merah, kurangi istirahat jika melewati jam 12:00-13:00
-        if ($this->is_tanggal_merah && $jamLembur > 0) {
-            $jamIstirahatMulai = Carbon::parse($tanggal . ' 12:00');
-            $jamIstirahatSelesai = Carbon::parse($tanggal . ' 13:00');
+        // hitung jam lembur dengan toleransi per jam
+        $jam = intdiv($menit, 60);
 
-            // Jika range lembur mencakup jam istirahat, kurangi 1 jam
-            if ($jamPulang->greaterThan($jamIstirahatSelesai) &&
-                $jamMulaiLembur->lessThan($jamIstirahatSelesai)) {
-                $jamLembur = max(0, $jamLembur - 1);
-            }
+        if (($menit % 60) >= (60 - $toleransiMenit)) {
+            $jam++;
         }
 
-        return $jamLembur;
+        // minimal 1 jam jika sudah masuk lembur
+        return max(1, $jam + 1);
     }
 
     public function getTerlambatAttribute()
     {
-        if (!$this->scan_masuk) {
+        if (!$this->scan_1) {
             return 0;
         }
 
         $tanggal = $this->tanggal->format('Y-m-d');
-        $jamMasuk = Carbon::parse($tanggal . ' ' . $this->scan_masuk);
-        $jamMasukStandar = Carbon::parse($tanggal . ' 08:00');
+        $jamMasuk = Carbon::parse($tanggal.' '.$this->scan_1);
+        $jamStandar = Carbon::parse($tanggal.' 08:00');
 
-        // Hitung selisih dalam menit
-        if ($jamMasuk->greaterThan($jamMasukStandar)) {
-            return $jamMasuk->diffInMinutes($jamMasukStandar);
+        if ($jamMasuk->lte($jamStandar)) {
+            return 0;
         }
 
-        return 0;
+        return $jamStandar->diffInMinutes($jamMasuk);
     }
 
     public function getPotonganTerlambatAttribute()
     {
-        return $this->terlambat >= 5 ? 5000 : 0;
+        if (!$this->scan_1) return 0;
+
+        $tanggal = $this->tanggal->format('Y-m-d');
+        $masuk = Carbon::parse($tanggal.' '.$this->scan_1);
+        $standar = Carbon::parse($tanggal.' 08:00');
+
+        if ($masuk->lte($standar)) return 0;
+
+        $menit = $standar->diffInMinutes($masuk);
+
+        // toleransi < 5 menit
+        if ($menit < 5) return 0;
+
+        // telat kecil
+        if ($menit < 30) return 5000;
+
+        // telat besar
+        return ($this->karyawan->gaji_per_hari / 8) * $this->jam_telat;
+    }
+
+    public function getJamTelatAttribute()
+    {
+        if (!$this->scan_1) return 0;
+
+        $tanggal = $this->tanggal->format('Y-m-d');
+        $masuk = Carbon::parse($tanggal.' '.$this->scan_1);
+        $standar = Carbon::parse($tanggal.' 08:00');
+
+        if ($masuk->lte($standar)) return 0;
+
+        $menit = $standar->diffInMinutes($masuk);
+
+        if ($menit < 30) return 0;
+
+        return (int) ceil($menit / 60);
+    }
+
+    public function getJamKerjaTanggalMerahAttribute()
+    {
+        if (!$this->is_tanggal_merah || !$this->scan_1 || !$this->scan_pulang) {
+            return 0;
+        }
+
+        $tanggal = $this->tanggal->format('Y-m-d');
+        $masuk = Carbon::parse($tanggal.' '.$this->scan_1);
+        $pulang = Carbon::parse($tanggal.' '.$this->scan_pulang);
+
+        $menit = $masuk->diffInMinutes($pulang);
+
+        // potong istirahat
+        if ($masuk < Carbon::parse($tanggal.' 13:00') &&
+            $pulang > Carbon::parse($tanggal.' 12:00')) {
+            $menit -= 60;
+        }
+
+        return max(0, floor($menit / 60));
+    }
+
+
+    public function getUpahTanggalMerahAttribute()
+    {
+        return $this->jam_kerja_tanggal_merah
+            * $this->karyawan->lembur_tanggal_merah_per_jam;
     }
 }

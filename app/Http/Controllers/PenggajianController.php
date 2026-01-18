@@ -70,10 +70,13 @@ class PenggajianController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'karyawan_ids' => 'required|array',
-            'karyawan_ids.*' => 'exists:karyawan,id',
             'periode_mulai' => 'required|date',
             'periode_selesai' => 'required|date|after_or_equal:periode_mulai',
+            'karyawan_ids' => 'required|array|min:1',
+            'karyawan_ids.*' => 'exists:karyawan,id',
+        ], [
+            'karyawan_ids.required' => 'Pilih minimal satu karyawan.',
+            'karyawan_ids.min' => 'Pilih minimal satu karyawan.',
         ]);
 
         $hasil = $this->penggajianService->generatePenggajianMassal(

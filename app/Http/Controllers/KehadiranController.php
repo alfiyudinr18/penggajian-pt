@@ -54,12 +54,12 @@ class KehadiranController extends Controller
             'scan_6' => 'nullable|date_format:H:i',
         ]);
 
-        // Check if it's Saturday
         $tanggal = Carbon::parse($validated['tanggal']);
+
+        // otomatis sabtu
         $validated['is_sabtu'] = $tanggal->isSaturday();
 
-        // Check if it's a holiday (tanggal merah)
-        // You can customize this logic or add a holidays table
+        // tanggal merah HARUS dari checkbox
         $validated['is_tanggal_merah'] = $request->boolean('is_tanggal_merah');
 
         Kehadiran::updateOrCreate(
@@ -93,10 +93,12 @@ class KehadiranController extends Controller
             'scan_6' => 'nullable|date_format:H:i',
         ]);
 
-        // Check if it's Saturday
         $tanggal = Carbon::parse($validated['tanggal']);
+
+        // otomatis sabtu
         $validated['is_sabtu'] = $tanggal->isSaturday();
 
+        // tanggal merah dari checkbox
         $validated['is_tanggal_merah'] = $request->boolean('is_tanggal_merah');
 
         $kehadiran->update($validated);

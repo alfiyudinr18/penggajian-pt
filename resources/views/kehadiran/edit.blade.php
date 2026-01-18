@@ -38,38 +38,50 @@
             @enderror
         </div>
 
+        {{-- PERBAIKAN UTAMA ADA DI BAGIAN VALUE SCAN DI BAWAH INI --}}
+        {{-- Kita menggunakan Carbon::parse(...)->format('H:i') untuk membuang detik --}}
+
         <div class="grid grid-cols-3 gap-4 mb-4">
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Scan 1 (Masuk)</label>
-                <input type="time" name="scan_1" value="{{ old('scan_1', $kehadiran->scan_1 ?? '') }}"
-                    class="w-full border rounded px-3 py-2">
+                <input type="time" name="scan_1"
+                    value="{{ old('scan_1', ($kehadiran->scan_1 ?? null) ? \Carbon\Carbon::parse($kehadiran->scan_1)->format('H:i') : '') }}"
+                    class="w-full border rounded px-3 py-2 @error('scan_1') border-red-500 @enderror">
+                 @error('scan_1') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Scan 2 (Keluar)</label>
-                <input type="time" name="scan_2" value="{{ old('scan_2', $kehadiran->scan_2 ?? '') }}"
-                    class="w-full border rounded px-3 py-2">
+                <input type="time" name="scan_2"
+                    value="{{ old('scan_2', ($kehadiran->scan_2 ?? null) ? \Carbon\Carbon::parse($kehadiran->scan_2)->format('H:i') : '') }}"
+                    class="w-full border rounded px-3 py-2 @error('scan_2') border-red-500 @enderror">
+                @error('scan_2') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Scan 3</label>
-                <input type="time" name="scan_3" value="{{ old('scan_3', $kehadiran->scan_3 ?? '') }}"
-                    class="w-full border rounded px-3 py-2">
+                <input type="time" name="scan_3"
+                    value="{{ old('scan_3', ($kehadiran->scan_3 ?? null) ? \Carbon\Carbon::parse($kehadiran->scan_3)->format('H:i') : '') }}"
+                    class="w-full border rounded px-3 py-2 @error('scan_3') border-red-500 @enderror">
+                @error('scan_3') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
         </div>
 
         <div class="grid grid-cols-3 gap-4 mb-4">
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Scan 4</label>
-                <input type="time" name="scan_4" value="{{ old('scan_4', $kehadiran->scan_4 ?? '') }}"
+                <input type="time" name="scan_4"
+                    value="{{ old('scan_4', ($kehadiran->scan_4 ?? null) ? \Carbon\Carbon::parse($kehadiran->scan_4)->format('H:i') : '') }}"
                     class="w-full border rounded px-3 py-2">
             </div>
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Scan 5</label>
-                <input type="time" name="scan_5" value="{{ old('scan_5', $kehadiran->scan_5 ?? '') }}"
+                <input type="time" name="scan_5"
+                    value="{{ old('scan_5', ($kehadiran->scan_5 ?? null) ? \Carbon\Carbon::parse($kehadiran->scan_5)->format('H:i') : '') }}"
                     class="w-full border rounded px-3 py-2">
             </div>
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Scan 6</label>
-                <input type="time" name="scan_6" value="{{ old('scan_6', $kehadiran->scan_6 ?? '') }}"
+                <input type="time" name="scan_6"
+                    value="{{ old('scan_6', ($kehadiran->scan_6 ?? null) ? \Carbon\Carbon::parse($kehadiran->scan_6)->format('H:i') : '') }}"
                     class="w-full border rounded px-3 py-2">
             </div>
         </div>

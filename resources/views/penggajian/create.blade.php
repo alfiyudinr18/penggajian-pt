@@ -6,6 +6,16 @@
 <div class="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
     <h1 class="text-2xl font-bold mb-6">Buat Penggajian Baru</h1>
 
+    @if ($errors->any())
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+            <ul class="text-sm text-red-700 list-disc ml-4">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('penggajian.store') }}" method="POST" id="formPenggajian">
         @csrf
 
@@ -47,7 +57,11 @@
             <div class="border rounded p-4 max-h-96 overflow-y-auto bg-gray-50">
                 @foreach($karyawanList as $k)
                 <label class="flex items-center py-2 hover:bg-gray-100 px-2 rounded">
-                    <input type="checkbox" name="karyawan_ids[]" value="{{ $k->id }}" class="mr-3 karyawan-checkbox">
+                    <input type="checkbox"
+                    name="karyawan_ids[]"
+                    value="{{ $k->id }}"
+                    class="mr-3 karyawan-checkbox"
+                    {{ in_array($k->id, old('karyawan_ids', [])) ? 'checked' : '' }}>
                     <div class="flex-1">
                         <span class="font-semibold">{{ $k->nama }}</span>
                         <span class="text-gray-600 text-sm ml-2">({{ $k->nip }})</span>
