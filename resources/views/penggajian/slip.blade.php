@@ -11,25 +11,25 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 11px;
+    color: #000;
 }
 
-/* === SATU HALAMAN === */
+/* === SATU HALAMAN (JANGAN DIUBAH STRUKTURNYA) === */
 .page {
     width: 100%;
     page-break-after: always;
 }
-
 .page:last-child {
-    page-break-after: auto; /* ⬅️ WAJIB */
+    page-break-after: auto;
 }
 
-/* === GRID 2x2 PALING AMAN DOMPDF === */
+/* === GRID 2x2 (AMAN DOMPDF) === */
 .cell {
     display: inline-block;
-    width: 90mm;          /* FIXED */
-    height: 125mm;        /* FIXED */
+    width: 90mm;
+    height: 125mm;
     margin: 2mm;
     vertical-align: top;
     box-sizing: border-box;
@@ -37,45 +37,108 @@ body {
 
 /* === SLIP === */
 .slip {
-    border: 1px solid #000;
-    padding: 6px;
+    position: relative;
+    border: 1px solid #222;
+    padding: 8px;
     height: 100%;
     box-sizing: border-box;
 }
 
-.header { text-align: center; font-weight: bold; }
-.title { font-size: 14px; }
-.line { border-top: 1px solid #000; margin: 4px 0; }
-
-.row {
-    clear: both;
+/* === WATERMARK === */
+.watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 85mm;
+    transform: translate(-50%, -50%);
+    opacity: 0.06;
+    z-index: 0;
 }
 
-.left { float: left; width: 65%; }
-.right { float: right; width: 35%; text-align: right; }
+.content {
+    position: relative;
+    z-index: 2;
+}
 
+/* === HEADER === */
+.header {
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.company {
+    color: #c9a24d; /* emas */
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.title {
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.slip-no {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 9px;
+    color: #555;
+}
+
+/* === GARIS === */
+.line {
+    border-top: 1px solid #000;
+    margin: 4px 0;
+}
+
+/* === BAR NAMA === */
 .blue {
     background: #6ea7d8;
+    color: #000;
     font-weight: bold;
     text-align: center;
-    padding: 2px;
+    padding: 4px;
 }
 
 .light {
-    background: #b9d7f0;
+    background: #d9ecfb;
     text-align: center;
-    padding: 2px;
+    padding: 3px;
+    font-size: 10px;
 }
 
+/* === ROW DATA === */
+.row {
+    clear: both;
+    margin: 2px 0;
+}
+
+.left {
+    float: left;
+    width: 65%;
+}
+
+.right {
+    float: right;
+    width: 35%;
+    text-align: right;
+}
+
+/* === TOTAL === */
 .total {
-    border-top: 1px solid #000;
+    border-top: 2px solid #000;
     margin-top: 6px;
     padding-top: 4px;
     font-weight: bold;
 }
 
-.red { color: red; }
+/* === WARNA === */
+.red {
+    color: #c00000;
+}
 </style>
+
 </head>
 <body>
 
