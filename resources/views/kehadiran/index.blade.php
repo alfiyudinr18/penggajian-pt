@@ -94,7 +94,8 @@
                     <td class="px-4 py-2 text-center">{{ $k->scan_3 ?? '-' }}</td>
 
                     <td class="px-4 py-2 text-center">
-                        @if(!$k->is_tanggal_merah && $k->jam_lembur > 0)
+                        {{-- HARI NORMAL --}}
+                        @if(!$k->is_tanggal_merah_view && $k->jam_lembur > 0)
                             <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-bold">
                                 {{ $k->jam_lembur }} jam
                             </span>
@@ -104,7 +105,7 @@
                     </td>
 
                     <td class="px-4 py-2 text-center">
-                        @if($k->is_tanggal_merah && $k->jam_kerja_tanggal_merah > 0)
+                        @if($k->is_tanggal_merah_view && $k->jam_kerja_tanggal_merah > 0)
                             <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold">
                                 {{ $k->jam_kerja_tanggal_merah }} jam
                             </span>
@@ -112,6 +113,7 @@
                             <span class="text-gray-400 text-sm">-</span>
                         @endif
                     </td>
+
 
                     <td class="px-4 py-2 text-center">
                         @if($k->terlambat >= 5)
@@ -129,7 +131,7 @@
                     </td>
 
                     <td class="px-4 py-2 text-center">
-                        @if($k->is_tanggal_merah)
+                        @if($k->is_tanggal_merah_view)
                             <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Tanggal Merah</span>
                         @elseif($k->is_sabtu)
                             <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Sabtu</span>
@@ -137,6 +139,7 @@
                             <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Normal</span>
                         @endif
                     </td>
+
 
                     <td class="px-4 py-2 text-center">
                         <a href="{{ route('kehadiran.edit', $k) }}" class="text-yellow-600 mx-1">

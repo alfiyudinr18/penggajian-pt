@@ -4,6 +4,11 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow-md p-6">
+    <a href="{{ route('penggajian.slip.pdf', request()->query()) }}"
+        target="_blank"
+        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+        <i class="fas fa-file-pdf"></i> Slip Gaji PDF
+    </a>
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Daftar Penggajian</h1>
         <a href="{{ route('penggajian.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">

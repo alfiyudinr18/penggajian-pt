@@ -6,6 +6,7 @@ use App\Models\Penggajian;
 use App\Models\Karyawan;
 use App\Services\PenggajianService;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
 class PenggajianController extends Controller
@@ -155,4 +156,45 @@ class PenggajianController extends Controller
 
         return view('penggajian.export', compact('penggajian'));
     }
+
+    public function slipPreview(Penggajian $penggajian)
+    {
+        return view('penggajian.slip', [
+            'penggajianList' => collect([$penggajian])
+        ]);
+    }
+
+    public function slipPdf(Request $request)
+    {
+        $query = Penggajian::with('karyawan');
+
+        if ($request->filled('periode_mulai')) {
+            $query->where('periode_mulai', $request->periode_mulai);
+        }
+
+        if ($request->filled('periode_selesai')) {
+            $query->where('periode_selesai', $request->periode_selesai);
+        }
+
+        if ($request->filled('karyawan_id')) {
+            $query->where('karyawan_id', $request->karyawan_id);
+        }
+
+        // ❗ WAJIB get(), JANGAN paginate()
+        $penggajianList = $query
+            ->orderBy('karyawan_id')
+            ->get();
+
+        // DEBUG (hapus setelah benar)
+        // dd($penggajianList->count());
+
+        $pdf = Pdf::loadView(
+            'penggajian.slip',
+            compact('penggajianList')
+        )->setPaper('a4', 'portrait');
+
+        return $pdf->stream('slip-gaji.pdf');
+    }
+
+
 }

@@ -21,6 +21,8 @@ Route::resource('kehadiran', KehadiranController::class)
 Route::post('/kehadiran/import', [KehadiranImportController::class, 'import'])
     ->name('kehadiran.import');
 
+Route::resource('tanggal-merah', \App\Http\Controllers\TanggalMerahController::class)
+    ->except(['create','edit','show']);
 
 // Kasbon Routes
 Route::resource('kasbon', KasbonController::class);
@@ -30,3 +32,10 @@ Route::post('kasbon/{kasbon}/potong', [KasbonController::class, 'potong'])->name
 Route::resource('penggajian', PenggajianController::class);
 Route::post('penggajian/preview', [PenggajianController::class, 'preview'])->name('penggajian.preview');
 Route::get('penggajian/export', [PenggajianController::class, 'export'])->name('penggajian.export');
+Route::get('penggajian/{penggajian}/slip',
+    [PenggajianController::class, 'slipPreview']
+)->name('penggajian.slip.preview');
+
+Route::get('penggajian/slip/pdf',
+    [PenggajianController::class, 'slipPdf']
+)->name('penggajian.slip.pdf');

@@ -77,6 +77,7 @@ class KehadiranImport implements ToCollection, WithStartRow
                 ]
             );
 
+            $isTanggalMerah = Carbon::parse($tanggal)->isSunday();
             /* ================= KEHADIRAN ================= */
             Kehadiran::updateOrCreate(
                 [
@@ -88,7 +89,7 @@ class KehadiranImport implements ToCollection, WithStartRow
                     'scan_2' => $this->parseJam($row[8] ?? null),
                     'scan_3' => $this->parseJam($row[9] ?? null),
                     'is_sabtu' => Carbon::parse($tanggal)->isSaturday(),
-                    'is_tanggal_merah' => false,
+                    'is_tanggal_merah' => $isTanggalMerah, // ⬅️ INI PENTING
                 ]
             );
         }

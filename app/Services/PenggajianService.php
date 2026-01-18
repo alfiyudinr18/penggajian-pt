@@ -13,7 +13,7 @@ class PenggajianService
     {
         $karyawan = Karyawan::findOrFail($karyawanId);
 
-        $periodeMulai = Carbon::parse($periodeMulai)->startOfDay();
+        $periodeMulai   = Carbon::parse($periodeMulai)->startOfDay();
         $periodeSelesai = Carbon::parse($periodeSelesai)->endOfDay();
 
         $kehadiran = Kehadiran::where('karyawan_id', $karyawanId)
@@ -22,7 +22,7 @@ class PenggajianService
 
         /* ================= HARI KERJA ================= */
         $hariKerja = $kehadiran->filter(fn ($k) =>
-            $k->scan_1 && !$k->is_tanggal_merah
+            $k->scan_1 && !$k->isTanggalMerah()
         )->count();
 
         /* ================= MINGGU ================= */
@@ -46,7 +46,7 @@ class PenggajianService
         $bonusMinggu2 = $alfaM2 >= 1 ? 0 : $karyawan->bonus_hadir_per_minggu;
 
         $uangMakan = $kehadiran->filter(fn ($k) =>
-            $k->scan_1 && !$k->is_tanggal_merah
+            $k->scan_1 && !$k->isTanggalMerah()
         )->count() * $karyawan->uang_makan;
 
         /* ================= LEMBUR ================= */
@@ -58,23 +58,32 @@ class PenggajianService
         foreach ($kehadiran as $k) {
             if (!$k->scan_1 || !$k->scan_pulang) continue;
 
-            $masuk = $k->tanggal->copy()->setTimeFromTimeString($k->scan_1);
+            $masuk  = $k->tanggal->copy()->setTimeFromTimeString($k->scan_1);
             $pulang = $k->tanggal->copy()->setTimeFromTimeString($k->scan_pulang);
 
-            if ($k->is_tanggal_merah) {
+            /* ===== TANGGAL MERAH / MINGGU ===== */
+            if ($k->isTanggalMerah()) {
+
                 $menit = $masuk->diffInMinutes($pulang);
 
-                if ($masuk < $k->tanggal->copy()->setTime(13, 0) &&
-                    $pulang > $k->tanggal->copy()->setTime(12, 0)) {
+                // potong istirahat 12–13
+                if (
+                    $masuk < $k->tanggal->copy()->setTime(13, 0) &&
+                    $pulang > $k->tanggal->copy()->setTime(12, 0)
+                ) {
                     $menit -= 60;
                 }
 
                 $jam = max(0, floor($menit / 60));
+
                 $jamLemburTglMerah += $jam;
-                $lemburTglMerah += $jam * $karyawan->lembur_tanggal_merah_per_jam;
-            } else {
+                $lemburTglMerah   += $jam * $karyawan->lembur_tanggal_merah_per_jam;
+
+            }
+            /* ===== HARI KERJA BIASA ===== */
+            else {
                 $jamLemburBiasa += $k->jam_lembur;
-                $lemburBiasa += $k->jam_lembur * $karyawan->lembur_biasa_per_jam;
+                $lemburBiasa   += $k->jam_lembur * $karyawan->lembur_biasa_per_jam;
             }
         }
 
@@ -82,9 +91,16 @@ class PenggajianService
         $potonganMasukSiang = $kehadiran->sum('potongan_terlambat');
 
         $sisaKasbon = $karyawan->total_sisa_kasbon ?? 0;
-        $potonganKasbon = min($sisaKasbon,
-            $gajiPokok + $bonusMinggu1 + $bonusMinggu2 +
-            $uangMakan + $lemburBiasa + $lemburTglMerah - $potonganMasukSiang
+
+        $potonganKasbon = min(
+            $sisaKasbon,
+            $gajiPokok +
+            $bonusMinggu1 +
+            $bonusMinggu2 +
+            $uangMakan +
+            $lemburBiasa +
+            $lemburTglMerah -
+            $potonganMasukSiang
         );
 
         $totalGaji =

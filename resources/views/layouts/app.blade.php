@@ -28,6 +28,9 @@
                     <a href="{{ route('penggajian.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded">
                         <i class="fas fa-file-invoice-dollar"></i> Penggajian
                     </a>
+                    <a href="{{ route('tanggal-merah.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded">
+                        <i class="fas fa-file-invoice-dollar"></i> Tanggal Merah
+                    </a>
                 </div>
             </div>
         </div>

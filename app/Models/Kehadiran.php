@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Models\TanggalMerah;
 
 class Kehadiran extends Model
 {
@@ -21,7 +22,7 @@ class Kehadiran extends Model
         'scan_4',
         'scan_5',
         'scan_6',
-        'is_tanggal_merah',
+        'is_tanggal_merah', // legacy / opsional
         'is_sabtu',
     ];
 
@@ -38,13 +39,27 @@ class Kehadiran extends Model
         return $this->belongsTo(Karyawan::class);
     }
 
-    /* ================= HELPER AMAN ================= */
+    /* ================= HELPER ================= */
 
     private function makeDateTime(?string $time): ?Carbon
     {
         return $time
             ? $this->tanggal->copy()->setTimeFromTimeString($time)
             : null;
+    }
+
+    /**
+     * 🔴 SATU-SATUNYA SUMBER KEBENARAN TANGGAL MERAH
+     */
+    public function isTanggalMerah(): bool
+    {
+        // Minggu otomatis tanggal merah
+        if ($this->tanggal->isSunday()) {
+            return true;
+        }
+
+        // dari tabel tanggal_merah
+        return TanggalMerah::whereDate('tanggal', $this->tanggal)->exists();
     }
 
     /* ================= SCAN ================= */
@@ -103,29 +118,26 @@ class Kehadiran extends Model
 
     public function getJamLemburAttribute()
     {
-        // ❗ tanggal merah BUKAN lembur biasa
-        if ($this->is_tanggal_merah || !$this->scan_pulang) {
+        // ❌ tanggal merah & minggu TIDAK BOLEH lembur biasa
+        if ($this->isTanggalMerah() || !$this->scan_pulang) {
             return 0;
         }
 
         $pulang = $this->makeDateTime($this->scan_pulang);
 
-        // jam selesai kerja
         $jamSelesai = $this->is_sabtu
             ? $this->tanggal->copy()->setTime(16, 0)
             : $this->tanggal->copy()->setTime(17, 0);
 
-        // jam mulai lembur
         $jamMulaiLembur = $jamSelesai->copy()->addHour();
 
-        // toleransi awal lembur 5 menit
+        // toleransi awal 5 menit
         if ($pulang->lt($jamMulaiLembur->copy()->subMinutes(5))) {
             return 0;
         }
 
         $menit = $jamMulaiLembur->diffInMinutes($pulang);
 
-        // hitung jam lembur
         $jam = intdiv($menit, 60);
 
         if (($menit % 60) >= 55) {
@@ -139,7 +151,7 @@ class Kehadiran extends Model
 
     public function getJamKerjaTanggalMerahAttribute()
     {
-        if (!$this->is_tanggal_merah || !$this->scan_1 || !$this->scan_pulang) {
+        if (!$this->isTanggalMerah() || !$this->scan_1 || !$this->scan_pulang) {
             return 0;
         }
 
@@ -165,5 +177,12 @@ class Kehadiran extends Model
     {
         return $this->jam_kerja_tanggal_merah
             * $this->karyawan->lembur_tanggal_merah_per_jam;
+    }
+
+    /* ================= VIEW ================= */
+
+    public function getIsTanggalMerahViewAttribute(): bool
+    {
+        return $this->isTanggalMerah();
     }
 }
