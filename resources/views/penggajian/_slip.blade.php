@@ -84,11 +84,6 @@
             <div class="right">Rp {{ number_format($p->uang_makan, 0, ',', '.') }}</div>
         </div>
 
-        <div class="row">
-            <div class="left">Uang Pokok</div>
-            <div class="right">Rp {{ number_format($p->lain_lain ?? 0, 0, ',', '.') }}</div>
-        </div>
-
         <div class="separator"></div>
 
         <div class="row">

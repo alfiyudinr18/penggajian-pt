@@ -31,7 +31,7 @@ body {
 .cell {
     display: inline-block;
     width: 85mm;
-    height: 115mm;
+    height: 112mm;
     margin: 1mm;
     vertical-align: top;
     box-sizing: border-box;
