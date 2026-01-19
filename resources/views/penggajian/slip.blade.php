@@ -125,7 +125,7 @@ body {
     text-align: center;
     margin-bottom: 12px;
     border-bottom: 3px solid #333;
-    padding-bottom: 20px;
+    padding-bottom: 8px;
     padding-top: 5px;
     background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
     margin-left: -10px;
@@ -139,34 +139,32 @@ body {
 .company {
     color: #b8860b;
     font-weight: bold;
-    font-size: 14px;
-    letter-spacing: 1.5px;
-    margin-bottom: 5px;
+    font-size: 11.5px;
+    letter-spacing: 1.2px;
+    margin-bottom: 6px;
     text-transform: uppercase;
-    line-height: 1.3;
+    line-height: 1.2;
 }
 
 .title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     letter-spacing: 4px;
     color: #1a1a1a;
-    margin-top: 4px;
-    margin-bottom: 8px;
+    margin-top: 2px;
+    margin-bottom: 5px;
 }
 
 .slip-no {
-    position: absolute;
-    bottom: 4px;
-    right: 15px;
-    font-size: 9px;
+    font-size: 8.5px;
     color: #666;
     background: #f5f5f5;
-    padding: 3px 8px;
+    padding: 2px 7px;
     border-radius: 3px;
     border: 1px solid #ddd;
-    z-index: 3;
     font-weight: 600;
+    display: inline-block;
+    margin-top: 3px;
 }
 
 /* === TANGGAL === */

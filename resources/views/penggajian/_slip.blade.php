@@ -96,12 +96,17 @@
         {{-- DETAIL GAJI --}}
         <div class="row">
             <div class="left">Gaji Pokok</div>
+            <div class="right"> </div>
+        </div>
+
+        <div class="row">
+            <div class="left">Masuk : {{ $p->hari_kerja }} hari</div>
             <div class="right">Rp {{ number_format($p->premi_full, 0, ',', '.') }}</div>
         </div>
 
         <div class="row">
-            <div class="left">Srt. Hari : {{ $p->hari_kerja }} hari</div>
-            <div class="right">-</div>
+            <div class="left">Srt. Hari : </div>
+            <div class="right"> </div>
         </div>
 
         <div class="separator"></div>
@@ -148,7 +153,7 @@
         <div class="separator"></div>
 
         <div class="row">
-            <div class="left">Masuk Siang : {{ $p->telat_count ?? 0 }} hari</div>
+            <div class="left">Masuk Siang : </div>
             <div class="right red">Rp {{ number_format($p->potongan_masuk_siang, 0, ',', '.') }}</div>
         </div>
 
