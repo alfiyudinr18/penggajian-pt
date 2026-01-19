@@ -1,87 +1,26 @@
 <div class="slip">
 
-    {{-- WATERMARK - Akan selalu muncul --}}
-    <div class="watermark-svg">
-        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-            <!-- Circle Background -->
-            <circle cx="100" cy="100" r="90" fill="none" stroke="#c9a24d" stroke-width="4" opacity="0.5"/>
-            <circle cx="100" cy="100" r="85" fill="none" stroke="#b8860b" stroke-width="2" opacity="0.3"/>
+    <div class="header">
+        <div class="header-top">
+            <div class="header-left">
+                <img src="file://{{ public_path('logo.png') }}" class="logo">
+            </div>
 
-            <!-- Eagle Wings - Lebih detail -->
-            <path d="M 100 55 Q 50 70 30 65 Q 35 75 45 80 Q 60 85 80 80 Q 90 75 100 70 Z" fill="#c9a24d" opacity="0.6"/>
-            <path d="M 100 55 Q 150 70 170 65 Q 165 75 155 80 Q 140 85 120 80 Q 110 75 100 70 Z" fill="#c9a24d" opacity="0.6"/>
+            <div class="header-center">
+                <div class="company">AGUNG PERKASA<br>UTAMA CEMERLANG</div>
+                <div class="title">Slip Gaji</div>
+            </div>
 
-            <!-- Eagle Body & Head -->
-            <ellipse cx="100" cy="85" rx="15" ry="25" fill="#b8860b" opacity="0.7"/>
-            <circle cx="100" cy="65" r="12" fill="#b8860b" opacity="0.7"/>
+            <div class="header-right">
+                <div class="slip-no">{{ str_pad($p->id, 6, '0', STR_PAD_LEFT) }}</div>
+            </div>
+        </div>
 
-            <!-- Beak -->
-            <path d="M 110 65 L 118 65 L 110 68 Z" fill="#d4af37" opacity="0.7"/>
-
-            <!-- Eye -->
-            <circle cx="105" cy="63" r="2" fill="#333" opacity="0.8"/>
-
-            <!-- Crown -->
-            <path d="M 100 50 L 103 58 L 111 58 L 105 63 L 107 71 L 100 66 L 93 71 L 95 63 L 89 58 L 97 58 Z" fill="#ffd700" opacity="0.7"/>
-
-            <!-- Shield - Lebih besar dan jelas -->
-            <path d="M 100 100 L 75 105 L 75 140 Q 75 158 100 170 Q 125 158 125 140 L 125 105 Z" fill="#fff" opacity="0.3" stroke="#4a90d9" stroke-width="3"/>
-
-            <!-- Shield Divisions -->
-            <line x1="75" y1="122" x2="125" y2="122" stroke="#4a90d9" stroke-width="2" opacity="0.4"/>
-            <line x1="100" y1="105" x2="100" y2="170" stroke="#4a90d9" stroke-width="2" opacity="0.4"/>
-
-            <!-- Shield Quarters -->
-            <rect x="77" y="107" width="21" height="13" fill="#4a90d9" opacity="0.3"/>
-            <rect x="102" y="107" width="21" height="13" fill="#e3f2fd" opacity="0.4"/>
-            <rect x="77" y="124" width="21" height="13" fill="#e3f2fd" opacity="0.4"/>
-            <rect x="102" y="124" width="21" height="13" fill="#4a90d9" opacity="0.3"/>
-
-            <!-- Center Emblem - APUC -->
-            <circle cx="100" cy="135" r="18" fill="#b8860b" opacity="0.5"/>
-            <text x="100" y="142" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2c5f8d" text-anchor="middle" opacity="0.7">APUC</text>
-
-            <!-- Decorative Stars -->
-            <circle cx="60" cy="110" r="3" fill="#ffd700" opacity="0.5"/>
-            <circle cx="140" cy="110" r="3" fill="#ffd700" opacity="0.5"/>
-            <circle cx="60" cy="140" r="3" fill="#ffd700" opacity="0.5"/>
-            <circle cx="140" cy="140" r="3" fill="#ffd700" opacity="0.5"/>
-
-            <!-- Bottom Ribbon -->
-            <path d="M 65 165 Q 100 172 135 165" fill="none" stroke="#b8860b" stroke-width="3" opacity="0.6"/>
-            <path d="M 65 165 L 60 175 L 65 170 Z" fill="#b8860b" opacity="0.5"/>
-            <path d="M 135 165 L 140 175 L 135 170 Z" fill="#b8860b" opacity="0.5"/>
-
-            <!-- Top Arc Text Path -->
-            <path id="topCurve" d="M 25 100 Q 100 35 175 100" fill="none"/>
-            <text font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#b8860b" opacity="0.6">
-                <textPath href="#topCurve" startOffset="50%" text-anchor="middle">
-                    AGUNG PERKASA UTAMA
-                </textPath>
-            </text>
-
-            <!-- Bottom Arc Text Path -->
-            <path id="bottomCurve" d="M 25 100 Q 100 165 175 100" fill="none"/>
-            <text font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#b8860b" opacity="0.6">
-                <textPath href="#bottomCurve" startOffset="50%" text-anchor="middle">
-                    CEMERLANG
-                </textPath>
-            </text>
-        </svg>
+        <div class="header-logo">
+            <img src="file://{{ public_path('logo.png') }}" class="logo">
+        </div>
     </div>
-
     <div class="content">
-
-        {{-- NOMOR SLIP --}}
-        <div class="slip-no">
-            NO. {{ str_pad($p->id, 6, '0', STR_PAD_LEFT) }}
-        </div>
-
-        {{-- HEADER --}}
-        <div class="header">
-            <div class="company">AGUNG PERKASA UTAMA CEMERLANG</div>
-            <div class="title">SLIP GAJI</div>
-        </div>
 
         {{-- TANGGAL --}}
         <div class="date-row">
@@ -171,7 +110,7 @@
         {{-- TANDA TANGAN --}}
         <div class="signature">
             Penerima,
-            <div style="height: 30px;"></div>
+            <div style="height: 25px;"></div>
             <div class="signature-line"></div>
         </div>
 
