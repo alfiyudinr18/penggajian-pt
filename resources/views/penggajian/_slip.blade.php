@@ -105,8 +105,8 @@
         </div>
 
         <div class="row">
-            <div class="left">Srt. Hari : </div>
-            <div class="right"> </div>
+            <div class="left">Srt. Hari :</div>
+            <div class="right"></div>
         </div>
 
         <div class="separator"></div>
@@ -153,7 +153,7 @@
         <div class="separator"></div>
 
         <div class="row">
-            <div class="left">Masuk Siang : </div>
+            <div class="left">Masuk Siang :</div>
             <div class="right red">Rp {{ number_format($p->potongan_masuk_siang, 0, ',', '.') }}</div>
         </div>
 
@@ -171,7 +171,7 @@
         {{-- TANDA TANGAN --}}
         <div class="signature">
             Penerima,
-            <div style="height: 45px;"></div>
+            <div style="height: 30px;"></div>
             <div class="signature-line"></div>
         </div>
 

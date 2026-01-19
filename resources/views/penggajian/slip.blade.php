@@ -7,12 +7,12 @@
 <style>
 @page {
     size: A4;
-    margin: 8mm;
+    margin: 5mm;
 }
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     color: #000;
     margin: 0;
     padding: 0;
@@ -30,9 +30,9 @@ body {
 /* === GRID 2x2 === */
 .cell {
     display: inline-block;
-    width: 92mm;
-    height: 130mm;
-    margin: 1.5mm;
+    width: 85mm;
+    height: 115mm;
+    margin: 1mm;
     vertical-align: top;
     box-sizing: border-box;
 }
@@ -170,16 +170,17 @@ body {
 /* === TANGGAL === */
 .date-row {
     background: #f5f5f5;
-    padding: 4px 8px;
-    margin: 6px -10px 8px -10px;
+    padding: 3px 6px;
+    margin: 5px -40mm 6px -40mm;
+    padding-left: 40mm;
     border-top: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
-    font-size: 9px;
+    font-size: 10px;
 }
 
 .date-label {
     display: inline-block;
-    width: 55px;
+    width: 50px;
     font-weight: bold;
 }
 
@@ -193,10 +194,11 @@ body {
     color: #fff;
     font-weight: bold;
     text-align: center;
-    padding: 6px;
-    margin: 0 -10px 0 -10px;
-    font-size: 11px;
-    letter-spacing: 0.5px;
+    padding: 5px;
+    margin: 0 -8px 0 -40mm;
+    padding-left: 40mm;
+    font-size: 12px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
 }
 
@@ -204,9 +206,10 @@ body {
     background: #e3f2fd;
     color: #1565c0;
     text-align: center;
-    padding: 4px;
-    margin: 0 -10px 8px -10px;
-    font-size: 9px;
+    padding: 3px;
+    margin: 0 -8px 6px -40mm;
+    padding-left: 40mm;
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     border-bottom: 1px solid #90caf9;
@@ -215,14 +218,14 @@ body {
 /* === ROW DATA === */
 .row {
     clear: both;
-    margin: 3px 0;
-    line-height: 1.4;
+    margin: 2px 0;
+    line-height: 1.3;
 }
 
 .left {
     float: left;
     width: 63%;
-    font-size: 9.5px;
+    font-size: 10.5px;
 }
 
 .right {
@@ -230,31 +233,31 @@ body {
     width: 37%;
     text-align: right;
     font-weight: 600;
-    font-size: 9.5px;
+    font-size: 10.5px;
 }
 
 /* === SEPARATOR === */
 .separator {
     border-top: 1px dashed #ccc;
-    margin: 6px 0;
+    margin: 4px 0;
 }
 
 /* === TOTAL === */
 .total {
     border-top: 2.5px double #000;
-    margin-top: 8px;
-    padding-top: 6px;
+    margin-top: 6px;
+    padding-top: 5px;
     font-weight: bold;
-    font-size: 10.5px;
+    font-size: 11.5px;
     background: #fffef7;
-    padding: 6px 4px 4px 4px;
-    margin-left: -4px;
-    margin-right: -4px;
+    padding: 5px 3px 3px 3px;
+    margin-left: -3px;
+    margin-right: -3px;
 }
 
 .total .left,
 .total .right {
-    font-size: 10.5px;
+    font-size: 11.5px;
 }
 
 /* === WARNA === */
@@ -264,23 +267,23 @@ body {
 
 /* === FOOTER === */
 .footer {
-    margin-top: 15px;
-    padding-top: 8px;
+    margin-top: 10px;
+    padding-top: 5px;
     border-top: 1px solid #ddd;
     text-align: center;
-    font-size: 9px;
+    font-size: 10px;
     color: #555;
 }
 
 .signature {
-    margin-top: 50px;
+    margin-top: 35px;
     text-align: center;
-    font-size: 10px;
+    font-size: 10.5px;
 }
 
 .signature-line {
     display: inline-block;
-    width: 120px;
+    width: 100px;
     border-bottom: 1px solid #000;
     margin-top: 2px;
 }
