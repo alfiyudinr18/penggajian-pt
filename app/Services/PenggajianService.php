@@ -67,17 +67,23 @@ class PenggajianService
                 $menit = $masuk->diffInMinutes($pulang);
 
                 // potong istirahat 12–13
-                if (
-                    $masuk < $k->tanggal->copy()->setTime(13, 0) &&
-                    $pulang > $k->tanggal->copy()->setTime(12, 0)
-                ) {
+                $istirahatMulai = $k->tanggal->copy()->setTime(12, 0);
+                $istirahatAkhir = $k->tanggal->copy()->setTime(13, 0);
+
+                if ($masuk < $istirahatAkhir && $pulang > $istirahatMulai) {
                     $menit -= 60;
                 }
 
-                $jam = max(0, floor($menit / 60));
+                if ($menit <= 0) continue;
 
-                $jamLemburTglMerah += $jam;
-                $lemburTglMerah   += $jam * $karyawan->lembur_tanggal_merah_per_jam;
+                // jam desimal
+                $jamDesimal = $menit / 60;
+
+                // pembulatan custom
+                $jamBulat = $this->roundJamCustom($jamDesimal);
+
+                $jamLemburTglMerah += $jamBulat;
+                $lemburTglMerah   += $jamBulat * $karyawan->lembur_tanggal_merah_per_jam;
 
             }
             /* ===== HARI KERJA BIASA ===== */
@@ -86,6 +92,7 @@ class PenggajianService
                 $lemburBiasa   += $k->jam_lembur * $karyawan->lembur_biasa_per_jam;
             }
         }
+
 
         /* ================= POTONGAN ================= */
         $potonganMasukSiang = $kehadiran->sum('potongan_terlambat');
@@ -141,6 +148,23 @@ class PenggajianService
     {
         return $kehadiran->filter(fn ($k) => !$k->scan_1)->count();
     }
+
+    private function roundJamCustom(float $jam): float
+    {
+        $jamUtuh = floor($jam);
+        $sisa    = $jam - $jamUtuh;
+
+        if ($sisa < 0.40) {
+            $tambahan = 0.0;
+        } elseif ($sisa < 0.90) {
+            $tambahan = 0.5;
+        } else {
+            $tambahan = 1.0;
+        }
+
+        return $jamUtuh + $tambahan;
+    }
+
 
     public function simpanGaji(array $data)
     {

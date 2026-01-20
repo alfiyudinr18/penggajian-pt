@@ -103,14 +103,33 @@ class Kehadiran extends Model
 
     public function getPotonganTerlambatAttribute()
     {
-        $menit = $this->terlambat;
+        if ($this->isTanggalMerah()) {
+            return 0;
+        }
 
-        if ($menit < 5) return 0;
+        if (!$this->scan_1) return 0;
 
+        $masuk   = $this->makeDateTime($this->scan_1);
+        $standar = $this->tanggal->copy()->setTime(8, 0);
+
+        // tidak telat
+        if ($masuk->lte($standar)) {
+            return 0;
+        }
+
+        $menit = $standar->diffInMinutes($masuk);
+
+        // toleransi 5 menit
+        if ($menit <= 5) {
+            return 0;
+        }
+
+        // 6–29 menit → potong 5.000
         if ($menit < 30) {
             return 5000;
         }
 
+        // ≥30 menit → potong jam kerja
         return ($this->karyawan->gaji_per_hari / 8) * $this->jam_telat;
     }
 
@@ -170,8 +189,12 @@ class Kehadiran extends Model
             $menit -= 60;
         }
 
-        return max(0, floor($menit / 60));
+        $jamDesimal = $menit / 60;
+
+        return $this->roundJamCustom($jamDesimal);
     }
+
+
 
     public function getUpahTanggalMerahAttribute()
     {
@@ -179,10 +202,29 @@ class Kehadiran extends Model
             * $this->karyawan->lembur_tanggal_merah_per_jam;
     }
 
+
+
     /* ================= VIEW ================= */
 
     public function getIsTanggalMerahViewAttribute(): bool
     {
         return $this->isTanggalMerah();
     }
+
+    private function roundJamCustom(float $jam): float
+    {
+        $jamUtuh = floor($jam);
+        $sisa    = $jam - $jamUtuh;
+
+        if ($sisa < 0.40) {
+            $tambahan = 0.0;
+        } elseif ($sisa < 0.90) {
+            $tambahan = 0.5;
+        } else {
+            $tambahan = 1.0;
+        }
+
+        return $jamUtuh + $tambahan;
+    }
+
 }

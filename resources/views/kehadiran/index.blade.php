@@ -116,7 +116,7 @@
 
 
                     <td class="px-4 py-2 text-center">
-                        @if($k->terlambat >= 5)
+                        @if($k->terlambat >= 6)
                             <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
                                 {{ $k->terlambat }} menit<br>
                                 (-Rp {{ number_format($k->potongan_terlambat, 0) }})
