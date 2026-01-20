@@ -110,6 +110,8 @@ class PenggajianService
             $potonganMasukSiang
         );
 
+        $potonganPulangCepat = $kehadiran->sum('potongan_pulang_cepat');
+
         $totalGaji =
             $gajiPokok +
             $bonusMinggu1 +
@@ -118,7 +120,9 @@ class PenggajianService
             $lemburBiasa +
             $lemburTglMerah -
             $potonganMasukSiang -
+            $potonganPulangCepat -
             $potonganKasbon;
+
 
         return [
             'karyawan_id' => $karyawan->id,

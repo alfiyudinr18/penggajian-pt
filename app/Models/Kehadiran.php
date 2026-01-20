@@ -84,13 +84,40 @@ class Kehadiran extends Model
     {
         if (!$this->scan_1) return 0;
 
-        $masuk   = $this->makeDateTime($this->scan_1);
-        $standar = $this->tanggal->copy()->setTime(8, 0);
+        // tanggal merah TIDAK dihitung telat
+        if ($this->isTanggalMerah()) return 0;
 
-        if ($masuk->lte($standar)) return 0;
+        $masuk = $this->makeDateTime($this->scan_1);
 
-        return $standar->diffInMinutes($masuk);
+        $jamKerja = [
+            ['08:00', '12:00'],
+            ['13:00', $this->is_sabtu ? '16:00' : '17:00'],
+        ];
+
+        $totalMenitTelat = 0;
+
+        foreach ($jamKerja as [$mulai, $selesai]) {
+            $start = $this->tanggal->copy()->setTimeFromTimeString($mulai);
+            $end   = $this->tanggal->copy()->setTimeFromTimeString($selesai);
+
+            // jika masuk sebelum jam kerja segmen → tidak telat segmen ini
+            if ($masuk->lte($start)) {
+                continue;
+            }
+
+            // jika masuk setelah jam kerja segmen → telat penuh segmen
+            if ($masuk->gte($end)) {
+                $totalMenitTelat += $start->diffInMinutes($end);
+                continue;
+            }
+
+            // masuk di tengah jam kerja
+            $totalMenitTelat += $start->diffInMinutes($masuk);
+        }
+
+        return $totalMenitTelat;
     }
+
 
     public function getJamTelatAttribute()
     {
@@ -170,30 +197,36 @@ class Kehadiran extends Model
 
     public function getJamKerjaTanggalMerahAttribute()
     {
-        if (!$this->isTanggalMerah() || !$this->scan_1 || !$this->scan_pulang) {
+        if (!$this->isTanggalMerah() || !$this->scan_pulang) {
             return 0;
         }
 
-        $masuk  = $this->makeDateTime($this->scan_1);
-        $pulang = $this->makeDateTime($this->scan_pulang);
+        // ⏰ JAM KERJA WAJIB MULAI 08:00
+        $mulaiKerja = $this->tanggal->copy()->setTime(8, 0);
+        $pulang     = $this->makeDateTime($this->scan_pulang);
 
-        if ($pulang->lte($masuk)) return 0;
+        if ($pulang->lte($mulaiKerja)) {
+            return 0;
+        }
 
-        $menit = $masuk->diffInMinutes($pulang);
+        $menit = $mulaiKerja->diffInMinutes($pulang);
 
-        // potong istirahat 12–13
+        // 🛑 POTONG ISTIRAHAT 12–13
         $istirahatMulai = $this->tanggal->copy()->setTime(12, 0);
         $istirahatAkhir = $this->tanggal->copy()->setTime(13, 0);
 
-        if ($masuk < $istirahatAkhir && $pulang > $istirahatMulai) {
+        if ($pulang > $istirahatMulai) {
             $menit -= 60;
+        }
+
+        if ($menit < 0) {
+            $menit = 0;
         }
 
         $jamDesimal = $menit / 60;
 
         return $this->roundJamCustom($jamDesimal);
     }
-
 
 
     public function getUpahTanggalMerahAttribute()
@@ -214,17 +247,53 @@ class Kehadiran extends Model
     private function roundJamCustom(float $jam): float
     {
         $jamUtuh = floor($jam);
-        $sisa    = $jam - $jamUtuh;
+        $sisaMenit = ($jam - $jamUtuh) * 60;
 
-        if ($sisa < 0.40) {
-            $tambahan = 0.0;
-        } elseif ($sisa < 0.90) {
-            $tambahan = 0.5;
-        } else {
-            $tambahan = 1.0;
+        if ($sisaMenit <= 24) {
+            return $jamUtuh;           // X.0
         }
 
-        return $jamUtuh + $tambahan;
+        if ($sisaMenit <= 49) {
+            return $jamUtuh + 0.5;     // X.5
+        }
+
+        return $jamUtuh + 1.0;         // (X+1).0
+    }
+
+    private function jamKerjaStandar(): int
+    {
+        return $this->is_sabtu ? 7 : 8;
+    }
+
+    public function getMenitPulangCepatAttribute(): int
+    {
+        if (!$this->scan_pulang || $this->isTanggalMerah()) {
+            return 0;
+        }
+
+        $pulang = $this->makeDateTime($this->scan_pulang);
+
+        $standarPulang = $this->is_sabtu
+            ? $this->tanggal->copy()->setTime(16, 0)
+            : $this->tanggal->copy()->setTime(17, 0);
+
+        if ($pulang->gte($standarPulang)) {
+            return 0;
+        }
+
+        return $pulang->diffInMinutes($standarPulang);
+    }
+
+    public function getPotonganPulangCepatAttribute(): float
+    {
+        $menit = $this->menit_pulang_cepat;
+
+        // toleransi 5 menit
+        if ($menit <= 10) return 0;
+
+        $jam = ceil($menit / 60);
+
+        return ($this->karyawan->gaji_per_hari / $this->jamKerjaStandar()) * $jam;
     }
 
 }

@@ -61,7 +61,7 @@ class KehadiranImport implements ToCollection, WithStartRow
             $karyawan = Karyawan::firstOrCreate(
                 ['pin' => $pin],
                 [
-                    'nip' => $row[1] ?? null,
+                    'nip' => isset($row[1]) && trim($row[1]) !== '' ? trim($row[1]) : null,
                     'nama' => $nama,
                     'jabatan' => $jabatan ?: null,
                     'departemen' => $row[4] ?? null,

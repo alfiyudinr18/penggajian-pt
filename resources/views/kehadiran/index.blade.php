@@ -114,21 +114,57 @@
                         @endif
                     </td>
 
+                    @php
+                        $totalMenit = round($k->terlambat, 2);
+                        $jam = intdiv((int)$totalMenit, 60);
+                        $menit = round($totalMenit % 60, 2);
 
-                    <td class="px-4 py-2 text-center">
+                    @endphp
+                    @php
+                        $formatMenit = function ($menit) {
+                            if ($menit < 60) {
+                                return rtrim(rtrim(number_format($menit, 2), '0'), '.') . ' menit';
+                            }
+
+                            $jam = intdiv((int)$menit, 60);
+                            $sisa = round($menit % 60);
+
+                            return $jam . ' jam ' . $sisa . ' menit';
+                        };
+                    @endphp
+
+                    <td class="px-4 py-2 text-center text-xs">
+
+                        {{-- TELAT --}}
                         @if($k->terlambat >= 6)
-                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
-                                {{ $k->terlambat }} menit<br>
+                            <div class="bg-red-100 text-red-800 px-2 py-1 rounded mb-1">
+                                Telat: {{ $formatMenit($k->terlambat) }}
                                 (-Rp {{ number_format($k->potongan_terlambat, 0) }})
-                            </span>
+                            </div>
                         @elseif($k->terlambat > 0)
-                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
-                                {{ $k->terlambat }} menit (Toleransi)
-                            </span>
-                        @else
-                            <span class="text-green-600 text-xs">Tepat Waktu</span>
+                            <div class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded mb-1">
+                                Telat: {{ $formatMenit($k->terlambat) }} (Toleransi)
+                            </div>
+                        @endif
+
+                        {{-- PULANG CEPAT --}}
+                        @if($k->menit_pulang_cepat >= 6)
+                            <div class="bg-red-100 text-red-800 px-2 py-1 rounded mb-1">
+                                Pulang cepat: {{ $formatMenit($k->menit_pulang_cepat) }}
+                                (-Rp {{ number_format($k->potongan_pulang_cepat, 0) }})
+                            </div>
+                        @elseif($k->menit_pulang_cepat > 0)
+                            <div class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded mb-1">
+                                Pulang cepat: {{ $formatMenit($k->menit_pulang_cepat) }} (Toleransi)
+                            </div>
+                        @endif
+
+                        {{-- TEPAT WAKTU --}}
+                        @if($k->terlambat == 0 && $k->menit_pulang_cepat == 0)
+                            <span class="text-green-600">Tepat Waktu</span>
                         @endif
                     </td>
+
 
                     <td class="px-4 py-2 text-center">
                         @if($k->is_tanggal_merah_view)

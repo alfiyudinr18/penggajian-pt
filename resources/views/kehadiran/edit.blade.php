@@ -38,6 +38,26 @@
             @enderror
         </div>
 
+        <div class="mb-4 flex gap-2">
+            <button type="button"
+                onclick="isiJamDefault()"
+                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
+                <i class="fas fa-clock"></i> Isi Jam Default
+            </button>
+
+            <button type="button"
+                onclick="isiJamMasuk()"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+                <i class="fas fa-sign-in-alt"></i> Masuk 08:00
+            </button>
+
+            <button type="button"
+                onclick="isiJamPulang()"
+                class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-sm">
+                <i class="fas fa-sign-out-alt"></i> Pulang Default
+            </button>
+        </div>
+
         {{-- PERBAIKAN UTAMA ADA DI BAGIAN VALUE SCAN DI BAWAH INI --}}
         {{-- Kita menggunakan Carbon::parse(...)->format('H:i') untuk membuang detik --}}
 
@@ -127,4 +147,41 @@
         </div>
     </form>
 </div>
+<script>
+function isSabtu() {
+    const tanggalInput = document.querySelector('input[name="tanggal"]');
+    if (!tanggalInput.value) return false;
+
+    const tanggal = new Date(tanggalInput.value);
+    return tanggal.getDay() === 6; // 6 = Sabtu
+}
+
+function isiJamMasuk() {
+    const scan1 = document.querySelector('input[name="scan_1"]');
+    if (!scan1.value) {
+        scan1.value = '08:00';
+    }
+}
+
+function isiJamPulang() {
+    const scanFields = [
+        'scan_6', 'scan_5', 'scan_4', 'scan_3', 'scan_2'
+    ];
+
+    let target = null;
+    scanFields.forEach(name => {
+        const el = document.querySelector(`input[name="${name}"]`);
+        if (!el.value && !target) target = el;
+    });
+
+    if (!target) return;
+
+    target.value = isSabtu() ? '16:00' : '17:00';
+}
+
+function isiJamDefault() {
+    isiJamMasuk();
+    isiJamPulang();
+}
+</script>
 @endsection
