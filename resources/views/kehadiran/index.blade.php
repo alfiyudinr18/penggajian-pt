@@ -135,34 +135,41 @@
 
                     <td class="px-4 py-2 text-center text-xs">
 
-                        {{-- TELAT --}}
+                        {{-- TELAT MASUK --}}
                         @if($k->terlambat >= 6)
                             <div class="bg-red-100 text-red-800 px-2 py-1 rounded mb-1">
-                                Telat: {{ $formatMenit($k->terlambat) }}
+                                Telat:
+                                {{ $formatMenit($k->terlambat) }}
                                 (-Rp {{ number_format($k->potongan_terlambat, 0) }})
                             </div>
                         @elseif($k->terlambat > 0)
                             <div class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded mb-1">
-                                Telat: {{ $formatMenit($k->terlambat) }} (Toleransi)
+                                Telat:
+                                {{ $formatMenit($k->terlambat) }} (Toleransi)
                             </div>
                         @endif
 
                         {{-- PULANG CEPAT --}}
-                        @if($k->menit_pulang_cepat >= 6)
+                        @if($k->menit_pulang_cepat >= 11)
                             <div class="bg-red-100 text-red-800 px-2 py-1 rounded mb-1">
-                                Pulang cepat: {{ $formatMenit($k->menit_pulang_cepat) }}
+                                Pulang Cepat:
+                                {{ $formatMenit($k->menit_pulang_cepat) }}
                                 (-Rp {{ number_format($k->potongan_pulang_cepat, 0) }})
                             </div>
                         @elseif($k->menit_pulang_cepat > 0)
                             <div class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded mb-1">
-                                Pulang cepat: {{ $formatMenit($k->menit_pulang_cepat) }} (Toleransi)
+                                Pulang Cepat:
+                                {{ $formatMenit($k->menit_pulang_cepat) }} (Toleransi)
                             </div>
                         @endif
 
                         {{-- TEPAT WAKTU --}}
                         @if($k->terlambat == 0 && $k->menit_pulang_cepat == 0)
-                            <span class="text-green-600">Tepat Waktu</span>
+                            <span class="text-green-600 font-semibold">
+                                Tepat Waktu
+                            </span>
                         @endif
+
                     </td>
 
 

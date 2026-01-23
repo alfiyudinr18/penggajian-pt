@@ -130,35 +130,30 @@ class Kehadiran extends Model
 
     public function getPotonganTerlambatAttribute()
     {
-        if ($this->isTanggalMerah()) {
-            return 0;
-        }
-
+        if ($this->isTanggalMerah()) return 0;
         if (!$this->scan_1) return 0;
 
         $masuk   = $this->makeDateTime($this->scan_1);
         $standar = $this->tanggal->copy()->setTime(8, 0);
 
-        // tidak telat
-        if ($masuk->lte($standar)) {
-            return 0;
-        }
-
         $menit = $standar->diffInMinutes($masuk);
 
-        // toleransi 5 menit
-        if ($menit <= 5) {
+        // ✅ SAMA DENGAN UI (≤ 6 toleransi)
+        if ($menit < 6) {
             return 0;
         }
 
-        // 6–29 menit → potong 5.000
+        // 6–29 menit
         if ($menit < 30) {
             return 5000;
         }
 
-        // ≥30 menit → potong jam kerja
-        return ($this->karyawan->gaji_per_hari / 8) * $this->jam_telat;
+        $jamKerja = $this->is_sabtu ? 7 : 8;
+
+        return ($this->karyawan->gaji_per_hari / $jamKerja) * ceil($menit / 60);
     }
+
+
 
     /* ================= LEMBUR BIASA ================= */
 
@@ -267,33 +262,92 @@ class Kehadiran extends Model
 
     public function getMenitPulangCepatAttribute(): int
     {
-        if (!$this->scan_pulang || $this->isTanggalMerah()) {
-            return 0;
-        }
+        if ($this->isTanggalMerah()) return 0;
+        if (!$this->scan_pulang) return 0;
 
         $pulang = $this->makeDateTime($this->scan_pulang);
 
-        $standarPulang = $this->is_sabtu
+        $standar = $this->is_sabtu
             ? $this->tanggal->copy()->setTime(16, 0)
             : $this->tanggal->copy()->setTime(17, 0);
 
-        if ($pulang->gte($standarPulang)) {
+        if ($pulang >= $standar) {
             return 0;
         }
 
-        return $pulang->diffInMinutes($standarPulang);
+        return $pulang->diffInMinutes($standar);
     }
+
 
     public function getPotonganPulangCepatAttribute(): float
     {
+        // ❌ Sabtu tidak ada potongan pulang cepat
+        if ($this->is_sabtu) return 0;
+
         $menit = $this->menit_pulang_cepat;
 
-        // toleransi 5 menit
-        if ($menit <= 10) return 0;
+        if ($menit <= 10) {
+            return 0;
+        }
 
-        $jam = ceil($menit / 60);
+        // hitung jam kerja
+        $jamKerja = 8;
 
-        return ($this->karyawan->gaji_per_hari / $this->jamKerjaStandar()) * $jam;
+        // sisa menit setelah toleransi
+        $menitEfektif = $menit - 10;
+
+        $jam = ceil($menitEfektif / 60);
+
+        return ($this->karyawan->gaji_per_hari / $jamKerja) * $jam;
+    }
+
+
+    public function getPotonganFinalAttribute(): float
+    {
+        if ($this->isTanggalMerah()) {
+            return 0;
+        }
+
+        return
+            $this->potongan_terlambat +
+            $this->potongan_pulang_cepat;
+    }
+
+    public function isGantungan(Carbon $periodeSelesai, string $cutoffTime = '12:00'): bool
+    {
+        if (!$this->scan_pulang) {
+            return false;
+        }
+
+        if (!$this->tanggal->isSameDay($periodeSelesai)) {
+            return false;
+        }
+
+        $pulang = $this->tanggal->copy()
+            ->setTimeFromTimeString($this->scan_pulang);
+
+        $cutoff = $this->tanggal->copy()
+            ->setTimeFromTimeString($cutoffTime);
+
+        return $pulang->gt($cutoff);
+    }
+
+    public function isMasukSetengahHari(): bool
+    {
+        if (!$this->scan_1 || !$this->scan_pulang) {
+            return true;
+        }
+
+        $masuk  = $this->tanggal->copy()->setTimeFromTimeString($this->scan_1);
+        $pulang = $this->tanggal->copy()->setTimeFromTimeString($this->scan_pulang);
+
+        $jamIstirahatMulai = $this->tanggal->copy()->setTime(12, 0);
+        $jamIstirahatSelesai = $this->tanggal->copy()->setTime(13, 0);
+
+        // datang setelah makan ATAU pulang sebelum makan
+        return
+            $masuk->gte($jamIstirahatMulai) ||
+            $pulang->lte($jamIstirahatSelesai);
     }
 
 }
