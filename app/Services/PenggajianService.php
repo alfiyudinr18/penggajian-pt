@@ -69,56 +69,38 @@ class PenggajianService
 
         foreach ($kehadiran as $k) {
 
-            if (!$k->scan_1 || !$k->scan_pulang) continue;
-
-            $masuk  = $k->tanggal->copy()->setTimeFromTimeString($k->scan_1);
-            $pulang = $k->tanggal->copy()->setTimeFromTimeString($k->scan_pulang);
-
-            // 🧷 FLAG LEMBUR GANTUNGAN
-            $cutoff = $k->tanggal->copy()->setTimeFromTimeString($cutoffTime);
-            $isHariGajian = $k->tanggal->isSameDay($periodeSelesai);
-            $isLemburGantungan = $isHariGajian && $pulang->gt($cutoff);
-
-            /* ===== TANGGAL MERAH / MINGGU ===== */
-            if ($k->isTanggalMerah()) {
-
-                // ❗ hanya lembur yang digantung
-                if ($isLemburGantungan) {
-                    continue;
-                }
-
-                $menit = $masuk->diffInMinutes($pulang);
-
-                // potong istirahat 12–13
-                $istirahatMulai = $k->tanggal->copy()->setTime(12, 0);
-                $istirahatAkhir = $k->tanggal->copy()->setTime(13, 0);
-
-                if ($masuk < $istirahatAkhir && $pulang > $istirahatMulai) {
-                    $menit -= 60;
-                }
-
-                if ($menit <= 0) continue;
-
-                $jamBulat = $this->roundJamCustom($menit / 60);
-
-                $jamLemburTglMerah += $jamBulat;
-                $lemburTglMerah   += $jamBulat * $karyawan->lembur_tanggal_merah_per_jam;
+            if (!$k->scan_1 || !$k->scan_pulang) {
+                continue;
             }
 
+            // ⛔ skip lembur gantungan
+            if ($k->isGantungan($periodeSelesai, $cutoffTime)) {
+                continue;
+            }
+
+            /* ===== TANGGAL MERAH ===== */
+            if ($k->isTanggalMerah()) {
+
+                // 🔥 AMBIL LANGSUNG DARI MODEL KEHADIRAN
+                $jam = $k->jam_kerja_tanggal_merah;
+
+                if ($jam > 0) {
+                    $jamLemburTglMerah += $jam;
+                    $lemburTglMerah   += $jam * $karyawan->lembur_tanggal_merah_per_jam;
+                }
+
+            }
             /* ===== HARI KERJA BIASA ===== */
             else {
 
-                // ❗ hanya lembur yang digantung
-                if ($isLemburGantungan) {
-                    continue;
-                }
+                $jam = $k->jam_lembur;
 
-                $jamLemburBiasa += $k->jam_lembur;
-                $lemburBiasa   += $k->jam_lembur * $karyawan->lembur_biasa_per_jam;
+                if ($jam > 0) {
+                    $jamLemburBiasa += $jam;
+                    $lemburBiasa   += $jam * $karyawan->lembur_biasa_per_jam;
+                }
             }
         }
-
-
 
         /* ================= POTONGAN ================= */
         $potonganWaktuTotal = $kehadiran->sum('potongan_final');

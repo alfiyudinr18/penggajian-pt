@@ -19,9 +19,9 @@
                     <th class="px-4 py-2 text-left">NIP</th>
                     <th class="px-4 py-2 text-left">Nama</th>
                     <th class="px-4 py-2 text-left">Jabatan</th>
-                    <th class="px-4 py-2 text-left">Departemen</th>
                     <th class="px-4 py-2 text-right">Gaji/Hari</th>
                     <th class="px-4 py-2 text-right">Bonus/Minggu</th>
+                    <th class="px-4 py-2 text-left">Uang Makan</th>
                     <th class="px-4 py-2 text-center">Status</th>
                     <th class="px-4 py-2 text-center">Aksi</th>
                 </tr>
@@ -33,9 +33,9 @@
                     <td class="px-4 py-2">{{ $k->nip }}</td>
                     <td class="px-4 py-2 font-semibold">{{ $k->nama }}</td>
                     <td class="px-4 py-2">{{ $k->jabatan }}</td>
-                    <td class="px-4 py-2">{{ $k->departemen }}</td>
                     <td class="px-4 py-2 text-right">Rp {{ number_format($k->gaji_per_hari, 0, ',', '.') }}</td>
                     <td class="px-4 py-2 text-right">Rp {{ number_format($k->bonus_hadir_per_minggu, 0, ',', '.') }}</td>
+                    <td class="px-4 py-2 text-right">Rp {{ number_format($k->uang_makan, 0, ',', '.') }}</td>
                     <td class="px-4 py-2 text-center">
                         @if($k->is_active)
                             <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Aktif</span>
