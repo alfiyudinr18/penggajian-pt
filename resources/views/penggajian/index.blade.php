@@ -106,6 +106,11 @@
                         <a href="{{ route('penggajian.show', $p) }}" class="text-blue-600 hover:text-blue-800 mx-1">
                             <i class="fas fa-eye"></i>
                         </a>
+                        <a href="{{ route('penggajian.edit', $p) }}"
+                        class="text-yellow-600 hover:text-yellow-800 mx-1">
+                            <i class="fas fa-edit"></i>
+                        </a>
+
                         <form action="{{ route('penggajian.destroy', $p) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')

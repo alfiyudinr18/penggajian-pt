@@ -100,6 +100,58 @@ class PenggajianController extends Controller
         ])->with('success', $message);
     }
 
+    public function edit(Penggajian $penggajian)
+    {
+        $penggajian->load('karyawan');
+
+        // sisa kasbon real-time dari tabel kasbon
+        $sisaKasbonAktif = \App\Models\Kasbon::where('karyawan_id', $penggajian->karyawan_id)
+            ->where('status', 'aktif')
+            ->sum('sisa');
+
+        return view('penggajian.edit', compact(
+            'penggajian',
+            'sisaKasbonAktif'
+        ));
+    }
+
+    public function update(Request $request, Penggajian $penggajian)
+    {
+        $validated = $request->validate([
+            'hari_kerja' => 'required|integer|min:0',
+            'premi_full' => 'required|numeric|min:0',
+            'bonus_minggu_1' => 'numeric|min:0',
+            'bonus_minggu_2' => 'numeric|min:0',
+            'uang_makan' => 'numeric|min:0',
+            'potongan_masuk_siang' => 'numeric|min:0',
+            'potongan_kasbon' => 'numeric|min:0',
+        ]);
+
+        // hitung ulang total gaji
+        $total =
+            $validated['premi_full'] +
+            $validated['bonus_minggu_1'] +
+            $validated['bonus_minggu_2'] +
+            $validated['uang_makan'] +
+            $penggajian->lembur_biasa +
+            $penggajian->lembur_tgl_merah -
+            $validated['potongan_masuk_siang'] -
+            $validated['potongan_kasbon'];
+
+        $penggajian->update([
+            ...$validated,
+            'total_gaji' => $total,
+            'sisa_kasbon' => max(
+                0,
+                $penggajian->sisa_kasbon - $validated['potongan_kasbon']
+            ),
+        ]);
+
+        return redirect()
+            ->route('penggajian.index')
+            ->with('success', 'Penggajian berhasil diperbarui.');
+    }
+
     public function show(Penggajian $penggajian)
     {
         $penggajian->load('karyawan');
