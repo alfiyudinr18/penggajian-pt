@@ -76,6 +76,7 @@
                     <th class="px-2 py-2 text-right">Pot. Kasbon</th>
                     <th class="px-2 py-2 text-right font-bold">Total Gaji</th>
                     <th class="px-2 py-2 text-center">Aksi</th>
+                    <th class="px-2 py-2 text-center">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -102,23 +103,76 @@
                     <td class="px-2 py-2 text-right">{{ number_format($p->kasbon_baru, 0) }}</td>
                     <td class="px-2 py-2 text-right">{{ number_format($p->potongan_kasbon, 0) }}</td>
                     <td class="px-2 py-2 text-right font-bold text-green-600">{{ number_format($p->total_gaji, 0) }}</td>
-                    <td class="px-2 py-2 text-center">
-                        <a href="{{ route('penggajian.show', $p) }}" class="text-blue-600 hover:text-blue-800 mx-1">
+                    <td class="px-2 py-2 text-center whitespace-nowrap">
+                        {{-- VIEW --}}
+                        <a href="{{ route('penggajian.show', $p) }}"
+                            class="text-blue-600 hover:text-blue-800 mx-1">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="{{ route('penggajian.edit', $p) }}"
-                        class="text-yellow-600 hover:text-yellow-800 mx-1">
-                            <i class="fas fa-edit"></i>
-                        </a>
 
-                        <form action="{{ route('penggajian.destroy', $p) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 mx-1" onclick="return confirm('Yakin ingin menghapus?')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        {{-- EDIT (HANYA DRAFT) --}}
+                        @if($p->status === 'draft')
+                            <a href="{{ route('penggajian.edit', $p) }}"
+                                class="text-yellow-600 hover:text-yellow-800 mx-1">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        @endif
+
+                        {{-- FINALISASI --}}
+                        @if($p->status === 'draft')
+                            <form action="{{ route('penggajian.finalize', $p) }}"
+                                method="POST"
+                                class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="text-green-600 hover:text-green-800 mx-1"
+                                    onclick="return confirm('Finalisasi penggajian ini? Data akan dikunci.')">
+                                    <i class="fas fa-lock"></i>
+                                </button>
+                            </form>
+                        @else
+                            <form action="{{ route('penggajian.unfinalize', $p) }}"
+                                method="POST"
+                                class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="text-orange-600 hover:text-orange-800 mx-1"
+                                    onclick="return confirm(
+                                        'PERINGATAN!\n\nPenggajian akan dikembalikan ke DRAFT.\nKasbon akan DIKEMBALIKAN.\n\nLanjutkan?'
+                                    )">
+                                    <i class="fas fa-unlock"></i>
+                                </button>
+                            </form>
+                        @endif
+
+                        {{-- DELETE (HANYA DRAFT) --}}
+                        @if($p->status === 'draft')
+                            <form action="{{ route('penggajian.destroy', $p) }}"
+                                method="POST"
+                                class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="text-red-600 hover:text-red-800 mx-1"
+                                    onclick="return confirm('Yakin ingin menghapus?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        @endif
                     </td>
+
+                    <td class="px-2 py-2 text-center">
+                        @if($p->status === 'draft')
+                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                                DRAFT
+                            </span>
+                        @else
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                FINAL
+                            </span>
+                        @endif
+                    </td>
+
                 </tr>
                 @empty
                 <tr>

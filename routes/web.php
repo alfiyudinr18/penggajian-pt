@@ -36,6 +36,14 @@ Route::get('penggajian/{penggajian}/slip',
     [PenggajianController::class, 'slipPreview']
 )->name('penggajian.slip.preview');
 
+Route::post('/penggajian/{penggajian}/finalize',
+    [PenggajianController::class, 'finalize']
+)->name('penggajian.finalize');
+
+Route::post('/penggajian/{penggajian}/unfinalize',
+    [PenggajianController::class, 'unfinalize']
+)->name('penggajian.unfinalize');
+
 Route::get('penggajian/slip/pdf',
     [PenggajianController::class, 'slipPdf']
 )->name('penggajian.slip.pdf');

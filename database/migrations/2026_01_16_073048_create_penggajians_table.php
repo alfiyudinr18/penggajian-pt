@@ -33,6 +33,9 @@ return new class extends Migration
             $table->decimal('kasbon_baru', 10, 2)->default(0);
             $table->decimal('potongan_kasbon', 10, 2)->default(0);
             $table->decimal('total_gaji', 10, 2);
+            $table->enum('status', ['draft', 'final'])->default('draft');
+            $table->string('no_slip')->nullable()->unique();
+            $table->timestamp('finalized_at')->nullable();
             $table->timestamps();
 
             $table->unique(['karyawan_id', 'periode_mulai', 'periode_selesai']);

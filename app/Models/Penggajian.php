@@ -32,6 +32,9 @@ class Penggajian extends Model
         'kasbon_baru',
         'potongan_kasbon',
         'total_gaji',
+        'status',
+        'finalized_at',
+        'no_slip',
     ];
 
     protected $casts = [
@@ -51,6 +54,7 @@ class Penggajian extends Model
         'kasbon_baru' => 'decimal:2',
         'potongan_kasbon' => 'decimal:2',
         'total_gaji' => 'decimal:2',
+        'finalized_at' => 'datetime',
     ];
 
     public function karyawan()

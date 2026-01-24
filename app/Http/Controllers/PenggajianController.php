@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Penggajian;
 use App\Models\Karyawan;
+use App\Models\Kasbon;
 use App\Services\PenggajianService;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PenggajianController extends Controller
 {
@@ -248,5 +250,101 @@ class PenggajianController extends Controller
         return $pdf->stream('slip-gaji.pdf');
     }
 
+    public function unfinalize(Penggajian $penggajian)
+    {
+        if ($penggajian->status !== 'final') {
+            return back()->with('error', 'Penggajian belum final.');
+        }
+
+        DB::transaction(function () use ($penggajian) {
+
+            // =========================
+            // KEMBALIKAN KASBON
+            // =========================
+            $jumlahDikembalikan = $penggajian->potongan_kasbon;
+
+            if ($jumlahDikembalikan > 0) {
+
+                // Ambil kasbon TERBARU dulu (dibalik dari potongan)
+                $kasbonList = Kasbon::where('karyawan_id', $penggajian->karyawan_id)
+                    ->orderBy('tanggal', 'desc')
+                    ->get();
+
+                foreach ($kasbonList as $kasbon) {
+                    if ($jumlahDikembalikan <= 0) break;
+
+                    $sisaRuang = $kasbon->jumlah - $kasbon->sisa;
+                    if ($sisaRuang <= 0) continue;
+
+                    $kembali = min($sisaRuang, $jumlahDikembalikan);
+
+                    $kasbon->update([
+                        'sisa' => $kasbon->sisa + $kembali,
+                        'status' => 'aktif'
+                    ]);
+
+                    $jumlahDikembalikan -= $kembali;
+                }
+            }
+
+            // =========================
+            // KEMBALIKAN KE DRAFT
+            // =========================
+            $penggajian->update([
+                'status' => 'draft',
+                'finalized_at' => null,
+            ]);
+        });
+
+        return back()->with(
+            'success',
+            'Penggajian dikembalikan ke DRAFT dan kasbon dipulihkan.'
+        );
+    }
+
+
+    public function finalize(Penggajian $penggajian)
+    {
+        // ❌ Cegah finalisasi ulang
+        if ($penggajian->status === 'final') {
+            return back()->with('error', 'Penggajian sudah difinalisasi.');
+        }
+
+        DB::transaction(function () use ($penggajian) {
+
+            // =========================
+            // POTONG KASBON
+            // =========================
+            $sisaPotong = $penggajian->potongan_kasbon;
+
+            if ($sisaPotong > 0) {
+                $kasbonList = Kasbon::where('karyawan_id', $penggajian->karyawan_id)
+                    ->where('status', 'aktif')
+                    ->orderBy('tanggal')
+                    ->get();
+
+                foreach ($kasbonList as $kasbon) {
+                    if ($sisaPotong <= 0) break;
+
+                    $potong = min($kasbon->sisa, $sisaPotong);
+                    $kasbon->potong($potong);
+
+                    $sisaPotong -= $potong;
+                }
+            }
+
+            // =========================
+            // FINALISASI PENGGAJIAN
+            // =========================
+            $penggajian->update([
+                'status' => 'final',
+                'finalized_at' => now(),
+            ]);
+        });
+
+        return redirect()
+            ->route('penggajian.index', request()->query())
+            ->with('success', 'Penggajian berhasil difinalisasi & kasbon dipotong.');
+    }
 
 }

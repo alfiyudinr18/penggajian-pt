@@ -103,7 +103,12 @@ class PenggajianService
         }
 
         /* ================= POTONGAN ================= */
-        $potonganWaktuTotal = $kehadiran->sum('potongan_final');
+        $potonganWaktuTotal = $kehadiran
+            ->reject(function ($k) use ($periodeSelesai, $cutoffTime) {
+                // ❌ JANGAN HITUNG TELAT DARI HARI GANTUNGAN
+                return $k->isGantungan($periodeSelesai, $cutoffTime);
+            })
+            ->sum('potongan_final');
 
         $sisaKasbon = $karyawan->total_sisa_kasbon ?? 0;
 
