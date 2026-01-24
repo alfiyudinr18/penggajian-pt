@@ -322,6 +322,34 @@ class Kehadiran extends Model
         return $pulang->gt($cutoff);
     }
 
+    public function isGantunganMilikPeriode(
+        Carbon $periodeMulai,
+        Carbon $periodeSelesai,
+        string $cutoffTime = '12:00'
+    ): bool {
+        if (!$this->scan_pulang) {
+            return false;
+        }
+
+        // hanya hari TERAKHIR periode ini
+        if (!$this->tanggal->isSameDay($periodeSelesai)) {
+            return false;
+        }
+
+        $pulang = $this->tanggal->copy()
+            ->setTimeFromTimeString($this->scan_pulang);
+
+        $cutoff = $this->tanggal->copy()
+            ->setTimeFromTimeString($cutoffTime);
+
+        return $pulang->gt($cutoff);
+    }
+
+    public function milikPeriodePayroll(Carbon $periodeMulai): bool
+    {
+        return $this->tanggal->gte($periodeMulai);
+    }
+
     public function isMasukSetengahHari(): bool
     {
         if (!$this->scan_1 || !$this->scan_pulang) {

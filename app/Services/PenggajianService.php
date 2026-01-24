@@ -15,6 +15,7 @@ class PenggajianService
         $karyawan = Karyawan::findOrFail($karyawanId);
 
         $periodeMulai   = Carbon::parse($periodeMulai)->startOfDay();
+        $periodePayrollMulai = $periodeMulai->copy()->addDay();
         $periodeSelesai = Carbon::parse($periodeSelesai)->endOfDay();
 
         $minggu1Mulai = $periodeMulai->copy();
@@ -68,7 +69,6 @@ class PenggajianService
         $cutoffTime = '12:00';
 
         foreach ($kehadiran as $k) {
-
             if (!$k->scan_1 || !$k->scan_pulang) {
                 continue;
             }
@@ -104,11 +104,18 @@ class PenggajianService
 
         /* ================= POTONGAN ================= */
         $potonganWaktuTotal = $kehadiran
-            ->reject(function ($k) use ($periodeSelesai, $cutoffTime) {
-                // ❌ JANGAN HITUNG TELAT DARI HARI GANTUNGAN
-                return $k->isGantungan($periodeSelesai, $cutoffTime);
+            ->filter(function ($k) use ($periodePayrollMulai) {
+                return
+                    $k->scan_1 &&
+                    !$k->isTanggalMerah() &&
+                    $k->tanggal->gte($periodePayrollMulai);
+                    // 🔥 INI KUNCINYA
             })
-            ->sum('potongan_final');
+            ->sum(function ($k) {
+                return
+                    $k->potongan_terlambat +
+                    $k->potongan_pulang_cepat;
+            });
 
         $sisaKasbon = $karyawan->total_sisa_kasbon ?? 0;
 
