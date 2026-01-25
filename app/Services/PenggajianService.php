@@ -43,25 +43,53 @@ class PenggajianService
         $cutoffTime = '15:00';
 
         /* ================= HARI KERJA ================= */
-        // 🔥 SKIP hari pertama periode HANYA jika dia gantungan periode lalu (biasanya Sabtu)
-        // Cek: apakah ada kehadiran di hari pertama yang gantungan
+        // 🔥 Ambil lembur gantungan dari SABTU periode sebelumnya
+        // Hari pertama periode = Sabtu akhir periode lalu yang gantungan
         $skipHariPertama = false;
         $lemburGantunganPeriodeLalu = null;
 
-        $kehadiranHariPertama = $kehadiran->firstWhere('tanggal', $periodeMulai);
+        // Cari kehadiran SABTU di hari sebelum periode dimulai
+        // (Sabtu akhir periode lalu yang mungkin gantungan)
+        $hariSebelumPeriode = $periodeMulai->copy()->subDay();
 
-        // Jika tidak ada kehadiran di hari pertama, cari di database (mungkin di luar range)
-        if (!$kehadiranHariPertama) {
-            $kehadiranHariPertama = Kehadiran::where('karyawan_id', $karyawanId)
-                ->whereDate('tanggal', $periodeMulai)
+        // Cek apakah hari sebelum periode adalah Sabtu
+        if ($hariSebelumPeriode->isSaturday()) {
+            $kehadiranSabtuLalu = Kehadiran::where('karyawan_id', $karyawanId)
+                ->whereDate('tanggal', $hariSebelumPeriode)
                 ->first();
+
+            // Jika Sabtu lalu ada lembur gantungan, ambil untuk periode ini
+            if ($kehadiranSabtuLalu &&
+                $kehadiranSabtuLalu->scan_pulang &&
+                $kehadiranSabtuLalu->isGantungan($hariSebelumPeriode, $cutoffTime)) {
+                $lemburGantunganPeriodeLalu = $kehadiranSabtuLalu;
+            }
         }
+
+        // Cek apakah hari PERTAMA periode adalah hari yang sudah dihitung di periode lalu
+        // (hanya jika hari pertama = Sabtu/Minggu/Tanggal Merah yang gantungan)
+        $kehadiranHariPertama = $kehadiran->first(function ($k) use ($periodeMulai) {
+            return $k->tanggal->isSameDay($periodeMulai);
+        });
 
         if ($kehadiranHariPertama &&
             $kehadiranHariPertama->scan_pulang &&
             $kehadiranHariPertama->isGantungan($periodeMulai, $cutoffTime)) {
-            $skipHariPertama = true;
-            $lemburGantunganPeriodeLalu = $kehadiranHariPertama;
+
+            // Jika hari pertama adalah Sabtu/Minggu/Tanggal Merah yang gantungan dari periode lalu
+            // maka ambil lemburnya dan skip hari kerjanya (jika bukan hari libur)
+            if ($periodeMulai->isSaturday() ||
+                $periodeMulai->isSunday() ||
+                $kehadiranHariPertama->isTanggalMerah()) {
+
+                // Ambil lembur dari hari pertama (override lembur dari hari sebelumnya jika ada)
+                $lemburGantunganPeriodeLalu = $kehadiranHariPertama;
+
+                // Skip hari kerja hanya jika Sabtu (Minggu/TM memang sudah tidak dihitung)
+                if ($periodeMulai->isSaturday()) {
+                    $skipHariPertama = true;
+                }
+            }
         }
 
         $hariKerja = $kehadiran->filter(function ($k) use ($periodeMulai, $skipHariPertama) {
@@ -71,7 +99,7 @@ class PenggajianService
             // Tidak hitung tanggal merah sebagai hari kerja
             if ($k->isTanggalMerah()) return false;
 
-            // 🔥 SKIP hari PERTAMA periode HANYA jika dia gantungan
+            // 🔥 SKIP hari PERTAMA periode HANYA jika dia Sabtu gantungan periode lalu
             if ($skipHariPertama && $k->tanggal->isSameDay($periodeMulai)) {
                 return false;
             }
@@ -134,8 +162,10 @@ class PenggajianService
                 continue;
             }
 
-            // ⛔ Skip hari PERTAMA jika dia Sabtu gantungan (sudah dihitung di atas)
-            if ($skipHariPertama && $k->tanggal->isSameDay($periodeMulai)) {
+            // ⛔ Skip hari PERTAMA jika dia gantungan (sudah dihitung di atas)
+            // Cek apakah ini hari yang sama dengan lembur gantungan periode lalu
+            if ($lemburGantunganPeriodeLalu &&
+                $k->tanggal->isSameDay($lemburGantunganPeriodeLalu->tanggal)) {
                 continue;
             }
 
