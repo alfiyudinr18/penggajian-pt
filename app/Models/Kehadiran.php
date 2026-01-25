@@ -325,7 +325,7 @@ class Kehadiran extends Model
     public function isGantunganMilikPeriode(
         Carbon $periodeMulai,
         Carbon $periodeSelesai,
-        string $cutoffTime = '12:00'
+        string $cutoffTime = '15:00'
     ): bool {
         if (!$this->scan_pulang) {
             return false;
