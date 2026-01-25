@@ -1,8 +1,5 @@
-@extends('layouts.app')
-
-@section('title', isset($karyawan) ? 'Edit Karyawan' : 'Tambah Karyawan')
-
-@section('content')
+<x-app-layout>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 <div class="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
     <h1 class="text-2xl font-bold mb-6">{{ isset($karyawan) ? 'Edit Karyawan' : 'Tambah Karyawan' }}</h1>
 
@@ -118,4 +115,5 @@
         </div>
     </form>
 </div>
-@endsection
+</div>
+</x-app-layout>

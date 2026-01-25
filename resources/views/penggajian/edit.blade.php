@@ -1,8 +1,5 @@
-@extends('layouts.app')
-
-@section('title', 'Edit Penggajian')
-
-@section('content')
+<x-app-layout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 <div class="bg-white rounded shadow p-6 max-w-3xl mx-auto">
     <h1 class="text-xl font-bold mb-4">
         Edit Penggajian – {{ $penggajian->karyawan->nama }}
@@ -82,4 +79,5 @@
         </div>
     </form>
 </div>
-@endsection
+    </div>
+</x-app-layout>

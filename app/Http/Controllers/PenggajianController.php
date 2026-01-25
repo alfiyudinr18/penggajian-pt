@@ -38,7 +38,7 @@ class PenggajianController extends Controller
 
         $penggajian = $query->orderBy('periode_selesai', 'desc')
             ->orderBy('karyawan_id')
-            ->paginate(50);
+            ->paginate(20);
 
         $karyawanList = Karyawan::where('is_active', true)->orderBy('nama')->get();
 

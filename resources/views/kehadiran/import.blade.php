@@ -1,8 +1,5 @@
-@extends('layouts.app')
+<x-app-layout>
 
-@section('title', 'Import Kehadiran')
-
-@section('content')
 <div class="bg-white rounded-lg shadow-md p-6 max-w-xl mx-auto">
     <h1 class="text-xl font-bold mb-4">Import Kehadiran (Excel)</h1>
 
@@ -30,4 +27,4 @@
         </div>
     </form>
 </div>
-@endsection
+</x-app-layout>

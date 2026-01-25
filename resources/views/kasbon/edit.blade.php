@@ -1,8 +1,5 @@
-@extends('layouts.app')
-
-@section('title', isset($kasbon) ? 'Edit Kasbon' : 'Tambah Kasbon')
-
-@section('content')
+<x-app-layout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 <div class="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
     <h1 class="text-2xl font-bold mb-6">{{ isset($kasbon) ? 'Edit Kasbon' : 'Tambah Kasbon' }}</h1>
 
@@ -115,6 +112,7 @@
         </div>
     </form>
 </div>
+    </div>
 
 @push('scripts')
 <script>
@@ -138,4 +136,4 @@ window.addEventListener('load', function() {
 });
 </script>
 @endpush
-@endsection
+</x-app-layout>

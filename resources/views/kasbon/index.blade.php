@@ -1,8 +1,5 @@
-@extends('layouts.app')
-
-@section('title', 'Daftar Kasbon')
-
-@section('content')
+<x-app-layout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 <div class="bg-white rounded-lg shadow-md p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Daftar Kasbon</h1>
@@ -130,4 +127,5 @@
         {{ $kasbon->links() }}
     </div>
 </div>
-@endsection
+    </div>
+</x-app-layout>

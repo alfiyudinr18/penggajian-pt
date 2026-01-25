@@ -1,8 +1,5 @@
-@extends('layouts.app')
-
-@section('title', 'Daftar Penggajian')
-
-@section('content')
+<x-app-layout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 <div class="bg-white rounded-lg shadow-md p-6">
     <a href="{{ route('penggajian.slip.pdf', request()->query()) }}"
         target="_blank"
@@ -211,4 +208,5 @@
         {{ $penggajian->links() }}
     </div>
 </div>
-@endsection
+    </div>
+</x-app-layout>

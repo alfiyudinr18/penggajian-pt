@@ -1,8 +1,5 @@
-@extends('layouts.app')
-
-@section('title', isset($kehadiran) ? 'Edit Kehadiran' : 'Tambah Kehadiran')
-
-@section('content')
+<x-app-layout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 <div class="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
     <h1 class="text-2xl font-bold mb-6">{{ isset($kehadiran) ? 'Edit Kehadiran' : 'Tambah Kehadiran' }}</h1>
 
@@ -147,6 +144,7 @@
         </div>
     </form>
 </div>
+</div>
 <script>
 function isSabtu() {
     const tanggalInput = document.querySelector('input[name="tanggal"]');
@@ -184,4 +182,4 @@ function isiJamDefault() {
     isiJamPulang();
 }
 </script>
-@endsection
+</x-app-layout>
