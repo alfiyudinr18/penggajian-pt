@@ -15,10 +15,6 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <button class="relative p-2 text-gray-400 hover:text-gray-500 transition-colors">
-                <i class="fas fa-bell text-lg"></i>
-                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
 
             <div x-data="{ dropdownOpen: false }" class="relative">
                 <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2 focus:outline-none">

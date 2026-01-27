@@ -22,22 +22,30 @@
 
             <x-navbar />
 
-            <main class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8">
-                @if(session('success'))
-                    <div class="mb-6 flex items-center p-4 mb-4 text-green-800 rounded-lg bg-green-50 border-l-4 border-green-500" role="alert">
-                        <i class="fas fa-check-circle mr-3"></i>
-                        <div class="text-sm font-medium">{{ session('success') }}</div>
-                    </div>
-                @endif
+            <main class="flex-1 overflow-y-auto bg-gray-50 flex flex-col scroll-smooth">
 
-                @if(session('error'))
-                    <div class="mb-6 flex items-center p-4 mb-4 text-red-800 rounded-lg bg-red-50 border-l-4 border-red-500" role="alert">
-                        <i class="fas fa-exclamation-circle mr-3"></i>
-                        <div class="text-sm font-medium">{{ session('error') }}</div>
-                    </div>
-                @endif
+                <div class="flex-1 p-4 sm:p-6 lg:p-8">
 
-                {{ $slot }}
+                    @if(session('success'))
+                        <div class="mb-6 flex items-center p-4 text-green-800 rounded-lg bg-green-50 border-l-4 border-green-500 shadow-sm" role="alert">
+                            <i class="fas fa-check-circle mr-3 text-lg"></i>
+                            <div class="text-sm font-medium">{{ session('success') }}</div>
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="mb-6 flex items-center p-4 text-red-800 rounded-lg bg-red-50 border-l-4 border-red-500 shadow-sm" role="alert">
+                            <i class="fas fa-exclamation-circle mr-3 text-lg"></i>
+                            <div class="text-sm font-medium">{{ session('error') }}</div>
+                        </div>
+                    @endif
+
+                    {{ $slot }}
+
+                </div>
+
+                <x-footer />
+
             </main>
         </div>
     </div>

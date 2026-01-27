@@ -219,13 +219,13 @@
                             <td class="px-3 py-3 font-semibold text-gray-900">{{ $p->karyawan->nama }}</td>
                             @endrole
 
-                            <td class="px-3 py-3 text-center text-gray-700">{{ $p->hari_kerja }}</td>
                             <td class="px-3 py-3">
                                 <div class="text-sm text-gray-900">
                                     {{ \Carbon\Carbon::parse($p->periode_mulai)->format('d/m/Y') }} -
                                     {{ \Carbon\Carbon::parse($p->periode_selesai)->format('d/m/Y') }}
                                 </div>
                             </td>
+                            <td class="px-3 py-3 text-center text-gray-700">{{ $p->hari_kerja }}</td>
                             <td class="px-3 py-3 text-right text-gray-700">{{ number_format($p->gaji_per_hari, 0) }}</td>
                             <td class="px-3 py-3 text-right text-gray-700">{{ number_format($p->premi_full, 0) }}</td>
                             <td class="px-3 py-3 text-center text-gray-700">{{ $p->alfa_m1 }}</td>

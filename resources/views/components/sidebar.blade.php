@@ -17,7 +17,7 @@
                 <div class="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg text-white shadow-md shadow-blue-200">
                     <i class="fas fa-wallet text-lg"></i>
                 </div>
-                <span class="text-xl font-bold text-gray-800 tracking-tight">Payroll</span>
+                <span class="text-xl font-bold text-gray-800 tracking-tight">PT. APUC</span>
             </a>
 
             <button @click="sidebarOpen = false" class="lg:hidden text-gray-500 hover:text-gray-700">
