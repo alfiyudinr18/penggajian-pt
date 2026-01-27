@@ -29,6 +29,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/karyawan/{karyawan}/account/create', [KaryawanAccountController::class, 'create'])->name('karyawan.account.create');
     Route::post('/karyawan/{karyawan}/account', [KaryawanAccountController::class, 'store'])->name('karyawan.account.store');
 
+    Route::delete('/kehadiran/bulk-destroy', [KehadiranController::class, 'bulkDestroy'])
+        ->name('kehadiran.bulk_destroy');
     Route::resource('kehadiran', KehadiranController::class)->except(['show']);
     Route::post('/kehadiran/import', [KehadiranImportController::class, 'import'])->name('kehadiran.import');
 

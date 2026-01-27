@@ -122,6 +122,19 @@ class KehadiranController extends Controller
             ->with('success', 'Data kehadiran berhasil dihapus.');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:kehadiran,id'
+        ]);
+
+        $jumlah = Kehadiran::whereIn('id', $request->ids)->delete();
+
+        return redirect()->back()
+            ->with('success', "Berhasil menghapus {$jumlah} data kehadiran.");
+    }
+
     public function import(Request $request)
     {
         $request->validate([
