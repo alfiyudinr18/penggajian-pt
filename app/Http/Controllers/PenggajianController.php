@@ -210,6 +210,30 @@ class PenggajianController extends Controller
             ->with('success', 'Data penggajian berhasil dihapus.');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:penggajian,id'
+        ]);
+
+        $count = 0;
+
+        // Gunakan loop untuk memastikan logic delete per item berjalan (jika ada observer/event)
+        // Atau gunakan whereIn untuk performa cepat
+        // Kita perlu pastikan hanya yang statusnya 'draft' yang bisa dihapus
+
+        $deleted = Penggajian::whereIn('id', $request->ids)
+            ->where('status', 'draft') // Safety: Hanya hapus yang draft
+            ->delete();
+
+        if ($deleted > 0) {
+            return redirect()->back()->with('success', "Berhasil menghapus {$deleted} data penggajian.");
+        } else {
+            return redirect()->back()->with('error', 'Tidak ada data yang dihapus (Mungkin status sudah Final).');
+        }
+    }
+
     public function export(Request $request)
     {
         $query = Penggajian::with('karyawan');

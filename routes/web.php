@@ -37,7 +37,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('kasbon', KasbonController::class);
     Route::post('kasbon/{kasbon}/potong', [KasbonController::class, 'potong'])->name('kasbon.potong');
 
-    // Penggajian (Hanya Create, Store, Edit, Update, Destroy & Proses Lanjutan)
+    Route::delete('penggajian/bulk-destroy', [PenggajianController::class, 'bulkDestroy'])
+        ->name('penggajian.bulk_destroy');
     Route::resource('penggajian', PenggajianController::class)->except(['index', 'show']);
     Route::post('penggajian/preview', [PenggajianController::class, 'preview'])->name('penggajian.preview');
     Route::get('penggajian/export', [PenggajianController::class, 'export'])->name('penggajian.export');

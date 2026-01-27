@@ -345,7 +345,6 @@
                             <li>• <strong>Kolom 2:</strong> Tanggal (DD/MM/YYYY)</li>
                             <li>• <strong>Kolom 3:</strong> Scan Masuk (HH:MM)</li>
                             <li>• <strong>Kolom 4:</strong> Scan Pulang (HH:MM)</li>
-                            <li>• <strong>Kolom 5:</strong> Scan Istirahat (Opsional)</li>
                         </ul>
                     </div>
                 </div>
