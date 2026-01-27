@@ -138,9 +138,18 @@ class PenggajianController extends Controller
 
     public function update(Request $request, Penggajian $penggajian)
     {
+        // 1. Validasi Input (Tambahkan field baru)
         $validated = $request->validate([
             'hari_kerja' => 'required|integer|min:0',
-            'premi_full' => 'required|numeric|min:0',
+            'premi_full' => 'required|numeric|min:0', // Gaji Pokok
+
+            // Field Baru: Absensi & Jam Lembur
+            'alfa_m1' => 'required|integer|min:0',
+            'alfa_m2' => 'required|integer|min:0',
+            'jam_lembur_biasa' => 'required|numeric|min:0',
+            'jam_lembur_tgl_merah' => 'required|numeric|min:0',
+
+            // Field Lainnya
             'bonus_minggu_1' => 'numeric|min:0',
             'bonus_minggu_2' => 'numeric|min:0',
             'uang_makan' => 'numeric|min:0',
@@ -148,22 +157,38 @@ class PenggajianController extends Controller
             'potongan_kasbon' => 'numeric|min:0',
         ]);
 
-        // hitung ulang total gaji
+        $totalHutangAktif = Kasbon::where('karyawan_id', $penggajian->karyawan_id)
+        ->where('status', 'aktif')
+        ->sum('sisa');
+
+        if ($validated['potongan_kasbon'] > $totalHutangAktif) {
+            return back()->withErrors([
+                'potongan_kasbon' => 'Potongan tidak boleh melebihi sisa hutang (Maks: Rp ' . number_format($totalHutangAktif, 0) . ')'
+            ])->withInput();
+        }
+
+        $sisaKasbonBaru = max(0, $totalHutangAktif - $validated['potongan_kasbon']);
+
+        $karyawan = $penggajian->karyawan;
+        $nominalLemburBiasa = $validated['jam_lembur_biasa'] * $karyawan->lembur_biasa_per_jam;
+        $nominalLemburTglMerah = $validated['jam_lembur_tgl_merah'] * $karyawan->lembur_tanggal_merah_per_jam;
+
         $total =
             $validated['premi_full'] +
             $validated['bonus_minggu_1'] +
             $validated['bonus_minggu_2'] +
             $validated['uang_makan'] +
-            $penggajian->lembur_biasa +
-            $penggajian->lembur_tgl_merah -
+            $nominalLemburBiasa +
+            $nominalLemburTglMerah -
             $validated['potongan_masuk_siang'] -
             $validated['potongan_kasbon'];
 
-        $penggajian->update([
-            ...$validated,
+        $penggajian->update(array_merge($validated, [
+            'lembur_biasa' => $nominalLemburBiasa,
+            'lembur_tgl_merah' => $nominalLemburTglMerah,
             'total_gaji' => $total,
-            'sisa_kasbon' => max(0, $penggajian->sisa_kasbon - $validated['potongan_kasbon']),
-        ]);
+            'sisa_kasbon' => $sisaKasbonBaru // Simpan hasil hitungan real-time
+        ]));
 
         $filters = $request->only(['periode_mulai', 'periode_selesai', 'karyawan_id']);
 
@@ -171,7 +196,6 @@ class PenggajianController extends Controller
             ->route('penggajian.index', $filters)
             ->with('success', 'Penggajian berhasil diperbarui.');
     }
-
     public function show(Penggajian $penggajian)
     {
         $penggajian->load('karyawan');
