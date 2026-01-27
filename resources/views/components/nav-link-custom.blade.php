@@ -2,11 +2,15 @@
 
 @php
 $classes = ($active ?? false)
-            ? 'flex items-center px-4 py-3 text-sm font-medium bg-blue-50 text-blue-600 rounded-lg transition-colors duration-200'
-            : 'flex items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200';
+            ? 'group flex items-center w-full px-3 py-3 text-sm font-medium bg-blue-50 text-blue-600 rounded-lg transition-all duration-200'
+            : 'group flex items-center w-full px-3 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-all duration-200';
 @endphp
 
 <a {{ $attributes->merge(['class' => $classes]) }}>
-    <i class="{{ $icon }} w-5 h-5 mr-3 text-center {{ $active ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500' }}"></i>
-    <span>{{ $slot }}</span>
+    {{-- Ikon: Pastikan ukurannya fix dan tidak mengecil (shrink-0) --}}
+    <div class="mr-3 flex-shrink-0 w-6 text-center">
+        <i class="{{ $icon }} text-lg {{ $active ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600' }}"></i>
+    </div>
+    {{-- Teks: Whitespace nowrap agar tidak turun ke bawah --}}
+    <span class="whitespace-nowrap">{{ $slot }}</span>
 </a>
