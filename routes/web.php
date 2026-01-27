@@ -13,10 +13,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -26,6 +22,7 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('karyawan', KaryawanController::class);
     Route::get('/karyawan/{karyawan}/account/create', [KaryawanAccountController::class, 'create'])->name('karyawan.account.create');
     Route::post('/karyawan/{karyawan}/account', [KaryawanAccountController::class, 'store'])->name('karyawan.account.store');
