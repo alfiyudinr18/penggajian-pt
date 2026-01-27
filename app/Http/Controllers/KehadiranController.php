@@ -85,12 +85,12 @@ class KehadiranController extends Controller
         $validated = $request->validate([
             'karyawan_id' => 'required|exists:karyawan,id',
             'tanggal' => 'required|date',
-            'scan_1' => 'nullable|date_format:H:i',
-            'scan_2' => 'nullable|date_format:H:i',
-            'scan_3' => 'nullable|date_format:H:i',
-            'scan_4' => 'nullable|date_format:H:i',
-            'scan_5' => 'nullable|date_format:H:i',
-            'scan_6' => 'nullable|date_format:H:i',
+            'scan_1' => 'nullable',
+            'scan_2' => 'nullable',
+            'scan_3' => 'nullable',
+            'scan_4' => 'nullable',
+            'scan_5' => 'nullable',
+            'scan_6' => 'nullable',
         ]);
 
         $tanggal = Carbon::parse($validated['tanggal']);

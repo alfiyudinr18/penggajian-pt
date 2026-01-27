@@ -1,87 +1,56 @@
-<nav class="bg-white border-b border-gray-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+<header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
 
-            {{-- LEFT --}}
-            <div class="flex">
-                {{-- Logo / App Name --}}
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}"
-                       class="text-lg font-bold text-gray-800">
-                        {{ config('app.name', 'Penggajian') }}
+        <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 hover:text-gray-700 focus:outline-none lg:hidden">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+
+        <div class="hidden md:flex flex-1 max-w-lg ml-4">
+            <div class="relative w-full text-gray-500 focus-within:text-gray-600">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i class="fas fa-search"></i>
+                </div>
+                <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out" placeholder="Cari sesuatu...">
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button class="relative p-2 text-gray-400 hover:text-gray-500 transition-colors">
+                <i class="fas fa-bell text-lg"></i>
+                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+
+            <div x-data="{ dropdownOpen: false }" class="relative">
+                <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2 focus:outline-none">
+                    <span class="hidden md:block text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                </button>
+
+                <div x-show="dropdownOpen"
+                     @click.away="dropdownOpen = false"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 scale-95"
+                     x-transition:enter-end="transform opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="transform opacity-100 scale-100"
+                     x-transition:leave-end="transform opacity-0 scale-95"
+                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 border border-gray-100"
+                     style="display: none;">
+
+                    <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-user mr-2 text-gray-400"></i> Profile
                     </a>
-                </div>
 
-                {{-- MENU ADMIN --}}
-                @role('admin')
-                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('karyawan.index')" :active="request()->routeIs('karyawan.*')">
-                        Karyawan
-                    </x-nav-link>
-                    <x-nav-link :href="route('kehadiran.index')" :active="request()->routeIs('kehadiran.*')">
-                        Kehadiran
-                    </x-nav-link>
-                    <x-nav-link :href="route('kasbon.index')" :active="request()->routeIs('kasbon.*')">
-                        Kasbon
-                    </x-nav-link>
-                    <x-nav-link :href="route('penggajian.index')" :active="request()->routeIs('penggajian.*')">
-                        Penggajian
-                    </x-nav-link>
-                    <x-nav-link :href="route('tanggal-merah.index')" :active="request()->routeIs('tanggal-merah.*')">
-                        Tanggal Merah
-                    </x-nav-link>
-                </div>
-                @endrole
+                    <div class="border-t border-gray-100 my-1"></div>
 
-                {{-- MENU KARYAWAN --}}
-                @role('karyawan')
-                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('penggajian.index')" :active="request()->routeIs('penggajian.*')">
-                        Slip Gaji
-                    </x-nav-link>
-                </div>
-                @endrole
-            </div>
-
-            {{-- RIGHT --}}
-            <div class="hidden sm:flex sm:items-center sm:ml-6">
-
-                {{-- User Dropdown --}}
-                <div class="ml-3 relative">
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-600 bg-white hover:text-gray-800 focus:outline-none transition">
-                                <div>{{ Auth::user()->name }}</div>
-
-                                <div class="ml-1">
-                                    <svg class="fill-current h-4 w-4" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                              clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                            </button>
-                        </x-slot>
-
-                        <x-slot name="content">
-                            {{-- Profile --}}
-                            <x-dropdown-link :href="route('profile.edit')">
-                                Profile
-                            </x-dropdown-link>
-
-                            {{-- Logout --}}
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
-                                    Logout
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </button>
+                    </form>
                 </div>
             </div>
-
         </div>
     </div>
-</nav>
+</header>
