@@ -3,6 +3,6 @@
         &copy; {{ date('Y') }} <span class="font-bold text-gray-600">Sistem Penggajian</span>.
     </p>
     <p class="mt-1">
-        by AYR
+        by AYRey
     </p>
 </footer>

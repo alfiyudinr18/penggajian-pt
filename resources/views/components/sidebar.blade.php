@@ -14,8 +14,9 @@
 
         <div class="flex items-center justify-between h-16 px-6 border-b border-gray-100 shrink-0">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-                <div class="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg text-white shadow-md shadow-blue-200">
-                    <i class="fas fa-wallet text-lg"></i>
+                <div class="flex items-center justify-center w-10 h-10">
+                    {{-- <i class="fas fa-wallet text-xl"></i> --}}
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-full h-full object-contain">
                 </div>
                 <span class="text-xl font-bold text-gray-800 tracking-tight">PT. APUC</span>
             </a>
