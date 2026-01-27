@@ -25,6 +25,7 @@
                         <th class="px-4 py-2 text-right">Uang Makan</th>
                         <th class="px-4 py-2 text-center">Status</th>
                         <th class="px-4 py-2 text-center">Aksi</th>
+                        <th class="px-4 py-2 text-center">Akun Login</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -75,6 +76,20 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                                @if($k->user_id)
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">
+                                        <i class="fas fa-check-circle"></i> Terhubung
+                                    </span>
+                                    <br>
+                                    <span class="text-xs text-gray-500">{{ $k->user->email ?? '' }}</span>
+                                @else
+                                    <a href="{{ route('karyawan.account.create', $k->id) }}"
+                                    class="bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold hover:bg-blue-600">
+                                    <i class="fas fa-user-plus"></i> Buat Akun
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                     @empty

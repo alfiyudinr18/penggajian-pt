@@ -12,6 +12,7 @@ class Karyawan extends Model
     protected $table = 'karyawan';
 
     protected $fillable = [
+        'user_id',
         'pin',
         'nip',
         'nama',
@@ -58,5 +59,10 @@ class Karyawan extends Model
     public function getTotalSisaKasbonAttribute()
     {
         return $this->kasbonAktif()->sum('sisa');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -1,16 +1,20 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 <div class="bg-white rounded-lg shadow-md p-6">
+    @role('admin')
     <a href="{{ route('penggajian.slip.pdf', request()->query()) }}"
         target="_blank"
         class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
         <i class="fas fa-file-pdf"></i> Slip Gaji PDF
     </a>
+    @endrole
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Daftar Penggajian</h1>
+        <h1 class="text-2xl font-bold">@role('admin') Daftar Penggajian @else Riwayat Slip Gaji Saya @endrole</h1>
+        @role('admin')
         <a href="{{ route('penggajian.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             <i class="fas fa-plus"></i> Buat Penggajian
         </a>
+        @endrole
     </div>
 
     <!-- Filter -->
@@ -26,6 +30,7 @@
                 <input type="date" name="periode_selesai" value="{{ request('periode_selesai') }}"
                     class="w-full border rounded px-3 py-2">
             </div>
+            @role('admin')
             <div>
                 <label class="block text-sm font-semibold mb-1">Karyawan</label>
                 <select name="karyawan_id" class="w-full border rounded px-3 py-2">
@@ -37,6 +42,7 @@
                     @endforeach
                 </select>
             </div>
+            @endrole
             <div class="flex items-end">
                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mr-2">
                     <i class="fas fa-filter"></i> Filter
@@ -54,7 +60,7 @@
             <thead class="bg-gray-200">
                 <tr>
                     <th class="px-2 py-2 text-left">No</th>
-                    <th class="px-2 py-2 text-left">Nama</th>
+                    @role('admin')<th class="px-2 py-2 text-left">Nama</th> @endrole
                     <th class="px-2 py-2 text-center">Hari Kerja</th>
                     <th class="px-2 py-2 text-right">Gaji/Hari</th>
                     <th class="px-2 py-2 text-right">Full</th>
@@ -80,7 +86,7 @@
                 @forelse($penggajian as $index => $p)
                 <tr class="border-b hover:bg-gray-50">
                     <td class="px-2 py-2">{{ $penggajian->firstItem() + $index }}</td>
-                    <td class="px-2 py-2 font-semibold">{{ $p->karyawan->nama }}</td>
+                    @role('admin') <td class="px-2 py-2 font-semibold">{{ $p->karyawan->nama }}</td> @endrole
                     <td class="px-2 py-2 text-center">{{ $p->hari_kerja }}</td>
                     <td class="px-2 py-2 text-right">{{ number_format($p->gaji_per_hari, 0) }}</td>
                     <td class="px-2 py-2 text-right">{{ number_format($p->premi_full, 0) }}</td>
@@ -106,7 +112,14 @@
                             class="text-blue-600 hover:text-blue-800 mx-1">
                             <i class="fas fa-eye"></i>
                         </a>
+                        @role('karyawan')
+                        <a href="{{ route('penggajian.slip.pdf', ['penggajian_id' => $p->id]) }}"
+                            class="text-red-600 hover:text-red-800 mx-1" title="Download PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </a>
+                        @endrole
 
+                        @role('admin')
                         {{-- EDIT (HANYA DRAFT) --}}
                         @if($p->status === 'draft')
                             <a href="{{ route('penggajian.edit', $p) }}"
@@ -156,6 +169,7 @@
                                 </button>
                             </form>
                         @endif
+                        @endrole
                     </td>
 
                     <td class="px-2 py-2 text-center">
@@ -177,6 +191,7 @@
                 </tr>
                 @endforelse
 
+                @role('admin')
                 @if($penggajian->count() > 0)
                 <tr class="bg-yellow-50 font-bold">
                     <td colspan="2" class="px-2 py-2 text-right">TOTAL:</td>
@@ -200,6 +215,7 @@
                     <td class="px-2 py-2"></td>
                 </tr>
                 @endif
+                @endrole
             </tbody>
         </table>
     </div>

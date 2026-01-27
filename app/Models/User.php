@@ -46,4 +46,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function karyawan()
+    {
+        return $this->hasOne(Karyawan::class);
+    }
 }

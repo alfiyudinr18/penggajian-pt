@@ -22,27 +22,46 @@ class PenggajianController extends Controller
 
     public function index(Request $request)
     {
+        $user = auth()->user();
         $query = Penggajian::with('karyawan');
 
+        // ==================================================
+        // LOGIKA KHUSUS KARYAWAN
+        // ==================================================
+        if ($user->hasRole('karyawan')) {
+            // Cek apakah user punya relasi ke tabel karyawan
+            if (!$user->karyawan) {
+                abort(403, 'Akun Anda belum terhubung ke data karyawan.');
+            }
+
+            // Karyawan HANYA bisa lihat miliknya DAN yang sudah FINAL
+            $query->where('karyawan_id', $user->karyawan->id)
+                ->where('status', 'final');
+        }
+        // ==================================================
+        // LOGIKA KHUSUS ADMIN
+        // ==================================================
+        else {
+            // Admin bisa memfilter berdasarkan Karyawan
+            if ($request->filled('karyawan_id')) {
+                $query->where('karyawan_id', $request->karyawan_id);
+            }
+        }
+
+        // Filter Tanggal (Berlaku untuk Admin & Karyawan)
         if ($request->filled('periode_mulai')) {
-            $query->where('periode_mulai', $request->periode_mulai);
+            $query->where('periode_mulai', '>=', $request->periode_mulai);
         }
-
         if ($request->filled('periode_selesai')) {
-            $query->where('periode_selesai', $request->periode_selesai);
+            $query->where('periode_selesai', '<=', $request->periode_selesai);
         }
 
-        if ($request->filled('karyawan_id')) {
-            $query->where('karyawan_id', $request->karyawan_id);
-        }
+        $penggajian = $query->orderBy('periode_selesai', 'desc')->paginate(50);
 
-        $penggajian = $query->orderBy('periode_selesai', 'desc')
-            ->orderBy('karyawan_id')
-            ->paginate(20);
+        // Kirim list karyawan hanya untuk Admin (untuk filter dropdown)
+        $karyawanList = $user->hasRole('admin') ? Karyawan::where('is_active', true)->orderBy('nama')->get() : [];
 
-        $karyawanList = Karyawan::where('is_active', true)->orderBy('nama')->get();
-
-        // Calculate totals for current page
+        // Perhitungan Total
         $totals = [
             'hari_kerja' => $penggajian->sum('hari_kerja'),
             'premi_full' => $penggajian->sum('premi_full'),
@@ -220,29 +239,48 @@ class PenggajianController extends Controller
 
     public function slipPdf(Request $request)
     {
+        $user = auth()->user();
         $query = Penggajian::with('karyawan');
 
+        // =======================================================
+        // 1. KEAMANAN: Filter berdasarkan Role
+        // =======================================================
+        if ($user->hasRole('karyawan')) {
+            // Karyawan HANYA boleh cetak miliknya sendiri yang sudah FINAL
+            $query->where('karyawan_id', $user->karyawan->id)
+                ->where('status', 'final');
+        } else {
+            // Admin boleh filter by karyawan_id
+            if ($request->filled('karyawan_id')) {
+                $query->where('karyawan_id', $request->karyawan_id);
+            }
+        }
+
+        // =======================================================
+        // 2. FILTER SPESIFIK (Untuk tombol di dalam tabel)
+        // =======================================================
+        if ($request->filled('penggajian_id')) {
+            $query->where('id', $request->penggajian_id);
+        }
+
+        // =======================================================
+        // 3. FILTER TANGGAL (Untuk tombol Cetak Semua di atas)
+        // =======================================================
         if ($request->filled('periode_mulai')) {
             $query->where('periode_mulai', $request->periode_mulai);
         }
-
         if ($request->filled('periode_selesai')) {
             $query->where('periode_selesai', $request->periode_selesai);
         }
 
-        if ($request->filled('karyawan_id')) {
-            $query->where('karyawan_id', $request->karyawan_id);
+        $penggajianList = $query->orderBy('karyawan_id')->get();
+
+        // Jika tidak ada data (misal karyawan iseng ganti ID di URL)
+        if ($penggajianList->isEmpty()) {
+            abort(403, 'Slip gaji tidak ditemukan, atau belum finalisasi.');
         }
 
-        // ❗ WAJIB get(), JANGAN paginate()
-        $penggajianList = $query
-            ->orderBy('karyawan_id')
-            ->get();
-
-        // DEBUG (hapus setelah benar)
-        // dd($penggajianList->count());
-
-        $pdf = Pdf::loadView(
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
             'penggajian.slip',
             compact('penggajianList')
         )->setPaper('a4', 'portrait');

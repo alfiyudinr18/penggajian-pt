@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\KaryawanAccountController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\KehadiranController;
 use App\Http\Controllers\KasbonController;
@@ -24,46 +25,36 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
-
-    // Karyawan Routes
     Route::resource('karyawan', KaryawanController::class);
+    Route::get('/karyawan/{karyawan}/account/create', [KaryawanAccountController::class, 'create'])->name('karyawan.account.create');
+    Route::post('/karyawan/{karyawan}/account', [KaryawanAccountController::class, 'store'])->name('karyawan.account.store');
 
-    // Kehadiran Routes
-    Route::resource('kehadiran', KehadiranController::class)
-        ->except(['show']);
+    Route::resource('kehadiran', KehadiranController::class)->except(['show']);
+    Route::post('/kehadiran/import', [KehadiranImportController::class, 'import'])->name('kehadiran.import');
 
-    Route::post('/kehadiran/import', [KehadiranImportController::class, 'import'])
-        ->name('kehadiran.import');
+    Route::resource('tanggal-merah', \App\Http\Controllers\TanggalMerahController::class)->except(['create','edit','show']);
 
-    Route::resource('tanggal-merah', \App\Http\Controllers\TanggalMerahController::class)
-        ->except(['create','edit','show']);
-
-    // Kasbon Routes
     Route::resource('kasbon', KasbonController::class);
     Route::post('kasbon/{kasbon}/potong', [KasbonController::class, 'potong'])->name('kasbon.potong');
 
-    // Penggajian Routes
-    Route::resource('penggajian', PenggajianController::class);
+    // Penggajian (Hanya Create, Store, Edit, Update, Destroy & Proses Lanjutan)
+    Route::resource('penggajian', PenggajianController::class)->except(['index', 'show']);
     Route::post('penggajian/preview', [PenggajianController::class, 'preview'])->name('penggajian.preview');
     Route::get('penggajian/export', [PenggajianController::class, 'export'])->name('penggajian.export');
-    Route::get('penggajian/{penggajian}/slip',
-        [PenggajianController::class, 'slipPreview']
-    )->name('penggajian.slip.preview');
-
-    Route::post('/penggajian/{penggajian}/finalize',
-        [PenggajianController::class, 'finalize']
-    )->name('penggajian.finalize');
-
-    Route::post('/penggajian/{penggajian}/unfinalize',
-        [PenggajianController::class, 'unfinalize']
-    )->name('penggajian.unfinalize');
-
-    Route::get('penggajian/slip/pdf',
-        [PenggajianController::class, 'slipPdf']
-    )->name('penggajian.slip.pdf');
+    Route::post('/penggajian/{penggajian}/finalize', [PenggajianController::class, 'finalize'])->name('penggajian.finalize');
+    Route::post('/penggajian/{penggajian}/unfinalize', [PenggajianController::class, 'unfinalize'])->name('penggajian.unfinalize');
 });
 
-Route::middleware(['auth', 'role:karyawan'])->group(function () {
 
+// ==========================================
+// RUTE BERSAMA (Bisa diakses Admin ATAU Karyawan)
+// ==========================================
+Route::middleware(['auth', 'role:admin|karyawan'])->group(function () {
+    // Index dan Show Penggajian
+    Route::get('penggajian', [PenggajianController::class, 'index'])->name('penggajian.index');
+    Route::get('penggajian/{penggajian}', [PenggajianController::class, 'show'])->name('penggajian.show');
+
+    // Rute Slip Gaji
+    Route::get('penggajian/{penggajian}/slip', [PenggajianController::class, 'slipPreview'])->name('penggajian.slip.preview');
+    Route::get('penggajian/slip/pdf', [PenggajianController::class, 'slipPdf'])->name('penggajian.slip.pdf');
 });
-
