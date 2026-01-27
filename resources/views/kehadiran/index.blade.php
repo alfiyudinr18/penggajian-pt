@@ -80,7 +80,7 @@
     </div>
 
     {{-- FORM PEMBUNGKUS BULK DELETE --}}
-    <form id="bulkDeleteForm" action="{{ route('kehadiran.bulk_destroy') }}" method="POST">
+    <form id="bulkDeleteForm" action="{{ route('kehadiran.bulk_destroy', request()->all()) }}" method="POST">
         @csrf
         @method('DELETE')
 
@@ -259,7 +259,7 @@
 
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end space-x-2">
-                                    <a href="{{ route('kehadiran.edit', $k) }}"
+                                    <a href="{{ route('kehadiran.edit', ['kehadiran' => $k->id] + request()->all()) }}"
                                        class="text-yellow-600 hover:text-yellow-900"
                                        title="Edit">
                                         <i class="fas fa-edit"></i>
@@ -293,13 +293,13 @@
 
     {{-- HIDDEN FORMS UNTUK DELETE SATUAN (Agar tidak form dalam form) --}}
     @foreach($kehadiran as $k)
-        <form id="delete-{{ $k->id }}" action="{{ route('kehadiran.destroy', $k) }}" method="POST" class="hidden">
+        <form id="delete-{{ $k->id }}" action="{{ route('kehadiran.destroy', ['kehadiran' => $k->id] + request()->all()) }}" method="POST" class="hidden">
             @csrf @method('DELETE')
         </form>
     @endforeach
 
     <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-        {{ $kehadiran->links() }}
+        {{ $kehadiran->appends(request()->query())->links() }}
     </div>
 </div>
 

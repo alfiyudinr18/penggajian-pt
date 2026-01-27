@@ -5,7 +5,7 @@
         Edit Penggajian – {{ $penggajian->karyawan->nama }}
     </h1>
 
-    <form method="POST" action="{{ route('penggajian.update', $penggajian) }}">
+    <form method="POST" action="{{ route('penggajian.update', ['penggajian' => $penggajian->id] + request()->all()) }}">
         @csrf
         @method('PUT')
 

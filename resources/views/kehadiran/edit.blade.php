@@ -13,7 +13,7 @@
         </div>
 
         <!-- Form -->
-        <form action="{{ isset($kehadiran) ? route('kehadiran.update', $kehadiran) : route('kehadiran.store') }}"
+        <form action="{{ isset($kehadiran) ? route('kehadiran.update', ['kehadiran' => $kehadiran->id] + request()->all()) : route('kehadiran.store') }}"
               method="POST"
               class="p-6 space-y-6">
             @csrf
@@ -242,7 +242,7 @@
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
-                <a href="{{ route('kehadiran.index') }}"
+                <a href="{{ route('kehadiran.index', request()->all()) }}"
                    class="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">
                     <i class="fas fa-times mr-2"></i>Batal
                 </a>

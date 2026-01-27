@@ -70,7 +70,9 @@ class KehadiranController extends Controller
             $validated
         );
 
-        return redirect()->route('kehadiran.index')
+        $filters = $request->only(['karyawan_id', 'tanggal_mulai', 'tanggal_selesai']);
+
+        return redirect()->route('kehadiran.index', $filters)
             ->with('success', 'Data kehadiran berhasil ditambahkan.');
     }
 
@@ -103,7 +105,9 @@ class KehadiranController extends Controller
 
         $kehadiran->update($validated);
 
-        return redirect()->route('kehadiran.index')
+        $filters = $request->only(['karyawan_id', 'tanggal_mulai', 'tanggal_selesai']);
+
+        return redirect()->route('kehadiran.index', $filters)
             ->with('success', 'Data kehadiran berhasil diperbarui.');
     }
 
@@ -114,11 +118,11 @@ class KehadiranController extends Controller
     }
 
 
-    public function destroy(Kehadiran $kehadiran)
+    public function destroy(Request $request,Kehadiran $kehadiran)
     {
-        $kehadiran->delete();
+        $filters = $request->only(['karyawan_id', 'tanggal_mulai', 'tanggal_selesai']);
 
-        return redirect()->route('kehadiran.index')
+        return redirect()->route('kehadiran.index', $filters)
             ->with('success', 'Data kehadiran berhasil dihapus.');
     }
 
@@ -131,7 +135,9 @@ class KehadiranController extends Controller
 
         $jumlah = Kehadiran::whereIn('id', $request->ids)->delete();
 
-        return redirect()->back()
+        $filters = $request->only(['karyawan_id', 'tanggal_mulai', 'tanggal_selesai']);
+
+        return redirect()->route('kehadiran.index', $filters)
             ->with('success', "Berhasil menghapus {$jumlah} data kehadiran.");
     }
 
@@ -141,9 +147,9 @@ class KehadiranController extends Controller
             'file' => 'required|mimes:xls,xlsx|max:2048'
         ]);
 
-        // nanti di sini panggil Excel::import(...)
-        // sementara test dulu
-        return redirect()->route('kehadiran.index')
+        $filters = $request->only(['karyawan_id', 'tanggal_mulai', 'tanggal_selesai']);
+
+        return redirect()->route('kehadiran.index', $filters)
             ->with('success', 'File berhasil dikirim (import logic menyusul)');
     }
 }

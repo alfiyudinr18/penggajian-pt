@@ -162,14 +162,13 @@ class PenggajianController extends Controller
         $penggajian->update([
             ...$validated,
             'total_gaji' => $total,
-            'sisa_kasbon' => max(
-                0,
-                $penggajian->sisa_kasbon - $validated['potongan_kasbon']
-            ),
+            'sisa_kasbon' => max(0, $penggajian->sisa_kasbon - $validated['potongan_kasbon']),
         ]);
 
+        $filters = $request->only(['periode_mulai', 'periode_selesai', 'karyawan_id']);
+
         return redirect()
-            ->route('penggajian.index')
+            ->route('penggajian.index', $filters)
             ->with('success', 'Penggajian berhasil diperbarui.');
     }
 
@@ -202,11 +201,14 @@ class PenggajianController extends Controller
         ]);
     }
 
-    public function destroy(Penggajian $penggajian)
+    public function destroy(Request $request, Penggajian $penggajian)
     {
         $penggajian->delete();
 
-        return redirect()->route('penggajian.index')
+        $filters = $request->only(['periode_mulai', 'periode_selesai', 'karyawan_id']);
+
+        return redirect()
+            ->route('penggajian.index', $filters)
             ->with('success', 'Data penggajian berhasil dihapus.');
     }
 
@@ -219,18 +221,16 @@ class PenggajianController extends Controller
 
         $count = 0;
 
-        // Gunakan loop untuk memastikan logic delete per item berjalan (jika ada observer/event)
-        // Atau gunakan whereIn untuk performa cepat
-        // Kita perlu pastikan hanya yang statusnya 'draft' yang bisa dihapus
-
         $deleted = Penggajian::whereIn('id', $request->ids)
             ->where('status', 'draft') // Safety: Hanya hapus yang draft
             ->delete();
 
+        $filters = $request->only(['periode_mulai', 'periode_selesai', 'karyawan_id']);
+
         if ($deleted > 0) {
-            return redirect()->back()->with('success', "Berhasil menghapus {$deleted} data penggajian.");
+            return redirect()->route('penggajian.index', $filters)->with('success', "Berhasil menghapus {$deleted} data penggajian.");
         } else {
-            return redirect()->back()->with('error', 'Tidak ada data yang dihapus (Mungkin status sudah Final).');
+            return redirect()->route('penggajian.index', $filters)->with('error', 'Tidak ada data yang dihapus (Mungkin status sudah Final).');
         }
     }
 
@@ -312,10 +312,13 @@ class PenggajianController extends Controller
         return $pdf->stream('slip-gaji.pdf');
     }
 
-    public function unfinalize(Penggajian $penggajian)
+    public function unfinalize(Request $request, Penggajian $penggajian)
     {
+        $filters = $request->only(['periode_mulai', 'periode_selesai', 'karyawan_id']);
+
         if ($penggajian->status !== 'final') {
-            return back()->with('error', 'Penggajian belum final.');
+            return redirect()
+            ->route('penggajian.index', $filters)->with('error', 'Penggajian belum final.');
         }
 
         DB::transaction(function () use ($penggajian) {
@@ -358,18 +361,19 @@ class PenggajianController extends Controller
             ]);
         });
 
-        return back()->with(
-            'success',
-            'Penggajian dikembalikan ke DRAFT dan kasbon dipulihkan.'
-        );
+        return redirect()
+            ->route('penggajian.index', $filters)
+            ->with('success', 'Penggajian dikembalikan ke DRAFT.');
     }
 
 
-    public function finalize(Penggajian $penggajian)
+    public function finalize(Request $request, Penggajian $penggajian)
     {
-        // ❌ Cegah finalisasi ulang
+        $filters = $request->only(['periode_mulai', 'periode_selesai', 'karyawan_id']);
+
         if ($penggajian->status === 'final') {
-            return back()->with('error', 'Penggajian sudah difinalisasi.');
+            return redirect()
+            ->route('penggajian.index', $filters)->with('error', 'Penggajian sudah difinalisasi.');
         }
 
         DB::transaction(function () use ($penggajian) {
@@ -405,7 +409,7 @@ class PenggajianController extends Controller
         });
 
         return redirect()
-            ->route('penggajian.index', request()->query())
+            ->route('penggajian.index', $filters)
             ->with('success', 'Penggajian berhasil difinalisasi & kasbon dipotong.');
     }
 
