@@ -33,7 +33,7 @@
                         <option value="{{ $k->id }}"
                                 data-sisa-kasbon="{{ $k->total_sisa_kasbon }}"
                                 {{ old('karyawan_id', $kasbon->karyawan_id ?? '') == $k->id ? 'selected' : '' }}>
-                            {{ $k->nama }} ({{ $k->nip }})
+                            {{ $k->nama }} ({{ $k->jabatan }})
                         </option>
                     @endforeach
                 </select>

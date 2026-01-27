@@ -113,8 +113,7 @@ class KehadiranController extends Controller
 
     public function show(Kehadiran $kehadiran)
     {
-        // kalau memang tidak dipakai, redirect saja
-        return redirect()->route('kehadiran.index');
+        return redirect()->route('kehadiran.index', request()->all());
     }
 
 
