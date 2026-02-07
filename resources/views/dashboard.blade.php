@@ -24,6 +24,35 @@
              DASHBOARD ADMIN
            ======================= --}}
         @role('admin')
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-slate-800 text-lg">Tren Kehadiran (7 Hari)</h3>
+                    <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Realtime</span>
+                </div>
+                <div class="relative h-64 w-full">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 text-lg mb-6">Status Penggajian</h3>
+                <div class="relative h-48 w-full flex justify-center">
+                    <canvas id="payrollChart"></canvas>
+                </div>
+                <div class="mt-6 space-y-2">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></span> Final</span>
+                        <span class="font-bold text-slate-700">{{ $total_karyawan > 0 ? round(($total_karyawan - $penggajian_draft) / $total_karyawan * 100) : 0 }}%</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 mr-2"></span> Draft</span>
+                        <span class="font-bold text-slate-700">{{ $total_karyawan > 0 ? round($penggajian_draft / $total_karyawan * 100) : 0 }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
@@ -223,4 +252,93 @@
         @endrole
 
     </div>
+
+@push('scripts')
+@role('admin')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 1. Grafik Tren Kehadiran (Line Chart)
+    const ctxAttendance = document.getElementById('attendanceChart').getContext('2d');
+
+    // Gradient Fill
+    const gradient = ctxAttendance.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)'); // Blue-500 opacity
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');   // Transparent
+
+    new Chart(ctxAttendance, {
+        type: 'line',
+        data: {
+            labels: {!! $chart_labels !!}, // Data dari Controller
+            datasets: [{
+                label: 'Jumlah Hadir',
+                data: {!! $chart_values !!}, // Data dari Controller
+                borderColor: '#3b82f6', // Blue-500
+                backgroundColor: gradient,
+                borderWidth: 2,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#3b82f6',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.4 // Garis melengkung halus
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [2, 4], color: '#e2e8f0' },
+                    ticks: { stepSize: 1, color: '#64748b' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#64748b' }
+                }
+            }
+        }
+    });
+
+    // 2. Grafik Status Penggajian (Doughnut Chart)
+    const ctxPayroll = document.getElementById('payrollChart').getContext('2d');
+    new Chart(ctxPayroll, {
+        type: 'doughnut',
+        data: {
+            labels: {!! $chart_pie_labels !!},
+            datasets: [{
+                data: {!! $chart_pie_values !!},
+                backgroundColor: ['#10b981', '#f59e0b'], // Emerald-500, Amber-500
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ' ' + context.label + ': ' + context.raw + ' Data';
+                        }
+                    }
+                }
+            },
+            cutout: '75%', // Lubang tengah donat
+        }
+    });
+</script>
+@endrole
+@endpush
 </x-app-layout>

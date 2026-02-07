@@ -10,13 +10,13 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    if (Auth::check()) {
+        if (Auth::user()->hasRole('admin')) {
+            return redirect()->route('dashboard');
+        }
+        return redirect()->route('penggajian.index');
+    }
+    return redirect()->route('login');
 });
 
 require __DIR__.'/auth.php';
@@ -44,6 +44,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('penggajian/export', [PenggajianController::class, 'export'])->name('penggajian.export');
     Route::post('/penggajian/{penggajian}/finalize', [PenggajianController::class, 'finalize'])->name('penggajian.finalize');
     Route::post('/penggajian/{penggajian}/unfinalize', [PenggajianController::class, 'unfinalize'])->name('penggajian.unfinalize');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 

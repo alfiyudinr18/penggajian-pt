@@ -192,7 +192,9 @@
                             <th class="px-3 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Kasbon Baru</th>
                             <th class="px-3 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Pot. Kasbon</th>
                             <th class="px-3 py-3 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Total Gaji</th>
+                            @role('admin')
                             <th class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                            @endrole
                             <th class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
@@ -244,7 +246,7 @@
                             <td class="px-3 py-3 text-right text-gray-700">{{ number_format($p->kasbon_baru, 0) }}</td>
                             <td class="px-3 py-3 text-right text-gray-700">{{ number_format($p->potongan_kasbon, 0) }}</td>
                             <td class="px-3 py-3 text-right font-bold text-green-600 text-base">{{ number_format($p->total_gaji, 0) }}</td>
-
+                            @role('admin')
                             <td class="px-3 py-3 text-center">
                                 @if($p->status === 'draft')
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
@@ -256,6 +258,7 @@
                                     </span>
                                 @endif
                             </td>
+                            @endrole
 
                             <td class="px-3 py-3">
                                 <div class="flex items-center justify-center space-x-2">

@@ -8,14 +8,36 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\BeforeSheet;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
-class KehadiranImport implements ToCollection, WithStartRow
+class KehadiranImport implements ToCollection, WithStartRow, WithEvents
 {
     public function startRow(): int
     {
         // Header di baris 1
         return 2;
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            BeforeSheet::class => function(BeforeSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+
+                // Cek Header di Baris 1
+                // Pastikan Kolom A1 adalah PIN dan G1 adalah Tanggal (sesuai index 0 dan 6)
+                $headerPin = trim($sheet->getCell('A2')->getValue());
+                $headerTgl = trim($sheet->getCell('G2')->getValue());
+
+                // Logic Validasi: Sesuaikan string ini dengan template Excel Anda
+                // Gunakan str_contains atau strtolower agar tidak case-sensitive
+                if (strtoupper($headerPin) !== 'PIN' || strtoupper($headerTgl) !== 'TANGGAL') {
+                    throw new \Exception("Format file salah! Pastikan menggunakan template yang benar (Header A2='PIN', G2='Tanggal').");
+                }
+            }
+        ];
     }
 
     public function collection(Collection $rows)
@@ -35,6 +57,10 @@ class KehadiranImport implements ToCollection, WithStartRow
             8 Scan 2
             9 Scan 3
             */
+
+            if (!isset($row[0]) && !isset($row[2])) {
+                continue;
+            }
 
             $pin     = trim($row[0] ?? '');
             $nip     = trim($row[1] ?? '');

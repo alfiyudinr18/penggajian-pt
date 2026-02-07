@@ -9,6 +9,7 @@ use App\Models\Penggajian;
 use App\Models\Kasbon;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -43,6 +44,37 @@ class DashboardController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->take(5)
                 ->get();
+
+            $startDate = Carbon::now()->subDays(6);
+            $chartData = Kehadiran::select(DB::raw('DATE(tanggal) as date'), DB::raw('count(*) as total'))
+                ->where('tanggal', '>=', $startDate)
+                ->whereNotNull('scan_1')
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            // Format data untuk Chart.js
+            $labels = [];
+            $values = [];
+            // Loop 7 hari terakhir agar tanggal yang kosong tetap muncul sebagai 0
+            for ($i = 0; $i <= 6; $i++) {
+                $date = $startDate->copy()->addDays($i)->format('Y-m-d');
+                $labels[] = Carbon::parse($date)->format('d M'); // Label Sumbu X
+
+                $found = $chartData->firstWhere('date', $date);
+                $values[] = $found ? $found->total : 0; // Nilai Sumbu Y
+            }
+
+            $data['chart_labels'] = json_encode($labels);
+            $data['chart_values'] = json_encode($values);
+
+            // 2. Grafik Status Penggajian (Draft vs Final)
+            $totalPenggajian = Penggajian::count();
+            $draftCount = $data['penggajian_draft'];
+            $finalCount = $totalPenggajian - $draftCount;
+
+            $data['chart_pie_labels'] = json_encode(['Final', 'Draft']);
+            $data['chart_pie_values'] = json_encode([$finalCount, $draftCount]);
         }
 
         // ==========================================

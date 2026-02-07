@@ -63,10 +63,6 @@
             @endrole
 
             @role('karyawan')
-                <x-nav-link-custom href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="fas fa-home">
-                    Dashboard
-                </x-nav-link-custom>
-
                 <x-nav-link-custom href="{{ route('penggajian.index') }}" :active="request()->routeIs('penggajian.*')" icon="fas fa-receipt">
                     Slip Gaji Saya
                 </x-nav-link-custom>

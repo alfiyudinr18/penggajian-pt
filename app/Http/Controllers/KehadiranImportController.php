@@ -11,11 +11,21 @@ class KehadiranImportController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls'
+            'file' => 'required|mimes:xls,xlsx|max:5120' // Maksimal 5MB
         ]);
 
-        Excel::import(new KehadiranImport, $request->file('file'));
+        // 2. Eksekusi Import menggunakan Class KehadiranImport
+        try {
+            Excel::import(new KehadiranImport, $request->file('file'));
 
-        return back()->with('success', 'Data kehadiran berhasil diimport');
+            // 3. Redirect Sukses
+            return redirect()->route('kehadiran.index')
+                ->with('success', 'Data kehadiran berhasil diimport!');
+
+        } catch (\Throwable $e) {
+            // 4. Handle Error
+            return redirect()->back()
+                ->with('error', 'Gagal import data: ' . $e->getMessage());
+        }
     }
 }
