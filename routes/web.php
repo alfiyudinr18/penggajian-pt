@@ -39,11 +39,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::delete('penggajian/bulk-destroy', [PenggajianController::class, 'bulkDestroy'])
         ->name('penggajian.bulk_destroy');
-    Route::resource('penggajian', PenggajianController::class)->except(['index', 'show']);
+    Route::resource('penggajian', PenggajianController::class);
     Route::post('penggajian/preview', [PenggajianController::class, 'preview'])->name('penggajian.preview');
     Route::get('penggajian/export', [PenggajianController::class, 'export'])->name('penggajian.export');
     Route::post('/penggajian/{penggajian}/finalize', [PenggajianController::class, 'finalize'])->name('penggajian.finalize');
     Route::post('/penggajian/{penggajian}/unfinalize', [PenggajianController::class, 'unfinalize'])->name('penggajian.unfinalize');
+    // Rute Slip Gaji
+    Route::get('penggajian/{penggajian}/slip', [PenggajianController::class, 'slipPreview'])->name('penggajian.slip.preview');
+    Route::get('penggajian/slip/pdf', [PenggajianController::class, 'slipPdf'])->name('penggajian.slip.pdf');
+
+    Route::get('penggajian/laporan/pdf', [PenggajianController::class, 'laporanPdf'])
+    ->name('penggajian.laporan.pdf');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -56,10 +62,5 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 // ==========================================
 Route::middleware(['auth', 'role:admin|karyawan'])->group(function () {
     // Index dan Show Penggajian
-    Route::get('penggajian', [PenggajianController::class, 'index'])->name('penggajian.index');
-    Route::get('penggajian/{penggajian}', [PenggajianController::class, 'show'])->name('penggajian.show');
 
-    // Rute Slip Gaji
-    Route::get('penggajian/{penggajian}/slip', [PenggajianController::class, 'slipPreview'])->name('penggajian.slip.preview');
-    Route::get('penggajian/slip/pdf', [PenggajianController::class, 'slipPdf'])->name('penggajian.slip.pdf');
 });

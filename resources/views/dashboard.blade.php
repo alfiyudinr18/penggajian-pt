@@ -44,11 +44,11 @@
                 <div class="mt-6 space-y-2">
                     <div class="flex justify-between items-center text-sm">
                         <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></span> Final</span>
-                        <span class="font-bold text-slate-700">{{ $total_karyawan > 0 ? round(($total_karyawan - $penggajian_draft) / $total_karyawan * 100) : 0 }}%</span>
+                        <span class="font-bold text-slate-700">{{ $total_penggajian > 0 ? round($penggajian_final / $total_penggajian * 100) : 0 }}%</span>
                     </div>
                     <div class="flex justify-between items-center text-sm">
                         <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 mr-2"></span> Draft</span>
-                        <span class="font-bold text-slate-700">{{ $total_karyawan > 0 ? round($penggajian_draft / $total_karyawan * 100) : 0 }}%</span>
+                        <span class="font-bold text-slate-700">{{ $total_penggajian > 0 ? round($penggajian_draft / $total_penggajian * 100) : 0 }}%</span>
                     </div>
                 </div>
             </div>
@@ -92,7 +92,7 @@
                 <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ $penggajian_draft }}</h3>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            {{-- <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="p-3 bg-rose-50 text-rose-600 rounded-lg">
                         <i class="fas fa-hand-holding-usd text-xl"></i>
@@ -102,7 +102,7 @@
                 <h3 class="text-2xl font-bold text-slate-800 mt-1 truncate" title="Rp {{ number_format($total_kasbon_aktif, 0, ',', '.') }}">
                     Rp {{ number_format($total_kasbon_aktif / 1000, 0, ',', '.') }}k
                 </h3>
-            </div>
+            </div> --}}
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

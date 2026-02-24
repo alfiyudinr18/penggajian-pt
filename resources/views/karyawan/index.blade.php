@@ -63,8 +63,8 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gaji/Hari</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Premi</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uang Makan</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Akun</th>
+                        {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th> --}}
+                        {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Akun</th> --}}
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -92,10 +92,10 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             Rp {{ number_format($k->bonus_hadir_per_minggu, 0, ',', '.') }}
                         </td>
-                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             Rp {{ number_format($k->uang_makan, 0, ',', '.') }}
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        </td>
+                        {{-- <td class="px-6 py-4 whitespace-nowrap">
                             @if($k->is_active)
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     <i class="fas fa-circle text-xs mr-1"></i> Aktif
@@ -105,8 +105,8 @@
                                     <i class="fas fa-circle text-xs mr-1"></i> Nonaktif
                                 </span>
                             @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        </td> --}}
+                        {{-- <td class="px-6 py-4 whitespace-nowrap">
                             @if($k->user_id)
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                     <i class="fas fa-check-circle mr-1"></i> Terhubung
@@ -117,7 +117,7 @@
                                     <i class="fas fa-user-plus mr-1"></i> Buat Akun
                                 </a>
                             @endif
-                        </td>
+                        </td> --}}
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex items-center justify-end space-x-2">
                                 <a href="{{ route('karyawan.show', $k) }}" class="text-blue-600 hover:text-blue-900" title="Lihat">

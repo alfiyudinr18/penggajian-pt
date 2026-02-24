@@ -29,11 +29,18 @@
                     Buat Penggajian
                 </a>
 
+                <a href="{{ route('penggajian.laporan.pdf', request()->query()) }}"
+                    target="_blank"
+                    class="inline-flex items-center px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+                        <i class="fas fa-print mr-2"></i>
+                        Cetak Laporan
+                </a>
+
                 <a href="{{ route('penggajian.slip.pdf', request()->query()) }}"
                    target="_blank"
                    class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm">
                     <i class="fas fa-file-pdf mr-2"></i>
-                    Cetak PDF
+                    Cetak Slip
                 </a>
             @endrole
         </div>

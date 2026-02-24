@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('karyawan_id')->constrained('karyawan')->onDelete('cascade');
             $table->date('tanggal');
-            $table->time('scan_1')->nullable(); // Jam masuk
-            $table->time('scan_2')->nullable(); // Jam keluar
+            $table->time('scan_1')->nullable();
+            $table->time('scan_2')->nullable();
             $table->time('scan_3')->nullable();
             $table->time('scan_4')->nullable();
             $table->time('scan_5')->nullable();

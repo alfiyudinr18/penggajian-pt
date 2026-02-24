@@ -285,6 +285,50 @@ class PenggajianController extends Controller
         ]);
     }
 
+    public function laporanPdf(Request $request)
+    {
+        $query = Penggajian::with('karyawan');
+
+        // Filter Karyawan
+        if ($request->filled('karyawan_id')) {
+            $query->where('karyawan_id', $request->karyawan_id);
+        }
+
+        // Filter Periode
+        if ($request->filled('periode_mulai')) {
+            $query->where('periode_mulai', '>=', $request->periode_mulai);
+        }
+
+        if ($request->filled('periode_selesai')) {
+            $query->where('periode_selesai', '<=', $request->periode_selesai);
+        }
+
+        $penggajianList = $query->orderBy('periode_selesai', 'desc')->get();
+
+        if ($penggajianList->isEmpty()) {
+            abort(404, 'Data laporan tidak ditemukan.');
+        }
+
+        $totals = [
+            'hari_kerja' => $penggajianList->sum('hari_kerja'),
+            'premi_full' => $penggajianList->sum('premi_full'),
+            'jam_lembur_biasa' => $penggajianList->sum('jam_lembur_biasa'),
+            'lembur_biasa' => $penggajianList->sum('lembur_biasa'),
+            'jam_lembur_tgl_merah' => $penggajianList->sum('jam_lembur_tgl_merah'),
+            'lembur_tgl_merah' => $penggajianList->sum('lembur_tgl_merah'),
+            'potongan_masuk_siang' => $penggajianList->sum('potongan_masuk_siang'),
+            'potongan_kasbon' => $penggajianList->sum('potongan_kasbon'),
+            'total_gaji' => $penggajianList->sum('total_gaji'),
+        ];
+
+        $pdf = Pdf::loadView(
+            'penggajian.laporan-pdf',
+            compact('penggajianList', 'totals')
+        )->setPaper('a4', 'landscape'); // landscape karena kolom banyak
+
+        return $pdf->stream('laporan-penggajian.pdf');
+    }
+
     public function slipPdf(Request $request)
     {
         $user = auth()->user();
